@@ -1,0 +1,49 @@
+@model IEnumerable<CineBook.Models.Theatre>
+
+<section class="theatres-section" aria-label="Theatres around you">
+    <div class="theatres-header">
+        <div>
+            <div class="theatres-eyebrow">Near <span id="theatreCityName">@(ViewData["SelectedCityName"] ?? "you")</span></div>
+            <h2 class="theatres-title">Theatres <span>Around You</span></h2>
+        </div>
+        <a asp-controller="Theatres" asp-action="Index" class="theatres-viewall">View all</a>
+    </div>
+    <p class="theatres-sub">Screens closest to your location.</p>
+
+    <div class="slider-viewport">
+        <div class="slider-track" id="theatreTrack">
+            @if (!Model.Any())
+    {
+        <p class="text-secondary">Theatres coming soon to your city.</p>
+    }
+            @foreach (var theatre in Model)
+            {
+                <a asp-controller="Theatres" asp-action="Details" asp-route-theatreId="@theatre.Id" class="theatre-card theatre-card-link">
+                    <h3 class="theatre-name">@theatre.Name</h3>
+                    <p class="theatre-area">@theatre.Area</p>
+                </a>
+            }
+        </div>
+
+        <button class="nav-btn" id="scrollLeft" aria-label="Scroll left">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+</svg>
+        </button>
+        <button class="nav-btn" id="scrollRight" aria-label="Scroll right">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+             <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
+            </svg>
+        </button>
+    </div>
+</section>
+
+<script>
+    (function () {
+        const track = document.getElementById('theatreTrack');
+        const left = document.getElementById('scrollLeft');
+        const right = document.getElementById('scrollRight');
+        left.addEventListener('click', () => track.scrollBy({ left: -260, behavior: 'smooth' }));
+        right.addEventListener('click', () => track.scrollBy({ left: 260, behavior: 'smooth' }));
+    })();
+</script>

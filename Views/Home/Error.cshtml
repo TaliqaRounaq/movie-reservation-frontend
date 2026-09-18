@@ -1,0 +1,11 @@
+@{
+    ViewData["Title"] = "Something went wrong";
+    var statusCode = ViewData["StatusCode"] as int? ?? 500;
+}
+
+<main class="container py-5 text-center">
+    <p class="text-uppercase text-warning fw-semibold">Error @statusCode</p>
+    <h1>We couldn't complete that request.</h1>
+    <p class="lead text-muted">Please try again. If the issue continues, return to the home page and start your booking again.</p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-warning">Back to home</a>
+</main>

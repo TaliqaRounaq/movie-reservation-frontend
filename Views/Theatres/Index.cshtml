@@ -1,0 +1,41 @@
+@model IEnumerable<CineBook.Models.Theatre>
+@{
+    ViewData["Title"] = "Theatres Near You";
+}
+
+<partial name="_Navbar" />
+
+<main class="theatres-page container">
+    <div class="theatres-page-heading">
+        <div class="theatres-eyebrow">Near @ViewData["SelectedCityName"]</div>
+        <h1 class="theatres-title">Theatres <span>Around You</span></h1>
+        <p class="theatres-sub">Screens closest to your location.</p>
+    </div>
+
+    <div class="theatres-grid">
+        @if (!Model.Any())
+        {
+            <p class="text-secondary">No theatres are available in this city yet.</p>
+        }
+        @foreach (var theatre in Model)
+        {
+            <a asp-controller="Theatres" asp-action="Details" asp-route-theatreId="@theatre.Id" class="theatre-card theatres-page-card theatre-card-link">
+                <h2 class="theatre-name">@theatre.Name</h2>
+                <p class="theatre-area">@theatre.Area</p>
+            </a>
+        }
+    </div>
+@await Component.InvokeAsync("DashboardPanel")
+<script src="~/js/dashboard.js" asp-append-version="true"></script>
+
+<script>
+   document.addEventListener('cinego:cityChanged', function (e) {
+    const currentCityId = new URLSearchParams(window.location.search).get('cityId');
+    const newCityId = String(e.detail.cityId);
+
+    if (currentCityId !== newCityId) {
+        window.location.href = `/Theatres?cityId=${newCityId}`;
+    }
+});
+</script>
+</main>

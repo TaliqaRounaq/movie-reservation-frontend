@@ -1,0 +1,78 @@
+@model CineBook.Models.MovieDetailViewModel
+<link rel="stylesheet" href="~/css/movie-details.css" asp-append-version="true" />
+
+@{
+    ViewData["Title"] = Model.Title;
+}
+<partial name ="_Navbar"/>
+
+<div class="container cb-detail-wrap">
+
+    <div class="cb-detail-hero">
+        <div class="cb-detail-poster">
+            <span class="cb-detail-rating">&#9733; @Model.Rating</span>
+        </div>
+        <div class="cb-detail-info">
+            <div class="cb-detail-chips">
+                <span class="cb-chip">@Model.Certificate</span>
+                <span class="cb-chip">@Model.Genre</span>
+                <span class="cb-chip">@Model.Language</span>
+                <span class="cb-chip">@Model.Runtime</span>
+            </div>
+            <h1 class="cb-detail-title">@Model.Title</h1>
+            <a href="#showtimes" class="cb-hero-cta">Book tickets</a>
+        </div>
+    </div>
+
+    <div class="cb-detail-section">
+        <h2 class="cb-section-title">About the movie</h2>
+        <p class="cb-detail-about">@Model.AboutText</p>
+    </div>
+
+    <div class="cb-detail-section">
+        <h2 class="cb-section-title">Cast</h2>
+        <div class="cb-cast-grid">
+            @foreach (var member in Model.Cast)
+            {
+                <div class="cb-cast-chip">
+                    <div class="cb-cast-avatar">@member.Substring(0,1)</div>
+                    <span>@member</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="cb-detail-section">
+        <h2 class="cb-section-title">Crew</h2>
+        <div class="cb-crew-list">
+            @foreach (var line in Model.Crew)
+            {
+                <div class="cb-crew-item">@line</div>
+            }
+        </div>
+    </div>
+
+   <div class="cb-detail-section" id="showtimes">
+    <h2 class="cb-section-title">Showtimes</h2>
+    <div id="showtimesContainer" data-movie-id="@Model.MovieId" data-movie-title="@Model.Title">
+        @foreach (var theatre in Model.Availability)
+        {
+            <div class="cb-showtime-card">
+                <div class="cb-showtime-head">
+                    <span class="cb-showtime-name">@theatre.TheatreName</span>
+                    <span class="cb-showtime-date">@theatre.Date</span>
+                </div>
+                <div class="cb-showtime-times">
+                    @foreach (var slot in theatre.Times)
+                    {
+                        <a class="cb-time-pill" href="/Seats/SeatCount?showtimeId=@slot.ShowId">@slot.Time</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+    @await Component.InvokeAsync("DashboardPanel")
+ <script src="~/js/home.js" asp-append-version="true"></script>
+ <script src="~/js/movie-details.js" asp-append-version="true"></script>
+</div>

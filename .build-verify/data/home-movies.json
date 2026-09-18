@@ -1,0 +1,108 @@
+{
+  "nowShowing": [
+    {
+      "id": 1,
+      "title": "Welcome to the Jungle",
+      "genre": "Comedy",
+      "language": "Hindi",
+      "runtime": "2h 45m",
+      "certificate": "UA16+",
+      "rating": 4.2
+    },
+    {
+      "id": 2,
+      "title": "Silent Frame",
+      "genre": "Thriller",
+      "language": "English",
+      "runtime": "2h 10m",
+      "certificate": "UA16+",
+      "rating": 4.6
+    },
+    {
+      "id": 3,
+      "title": "Autumn Light",
+      "genre": "Drama",
+      "language": "Urdu",
+      "runtime": "2h 20m",
+      "certificate": "U",
+      "rating": 4.4
+    },
+    {
+      "id": 4,
+      "title": "Coastal Static",
+      "genre": "Mystery",
+      "language": "Kashmiri",
+      "runtime": "2h 05m",
+      "certificate": "UA13+",
+      "rating": 4.3
+    }
+  ],
+  "recommended": [
+    {
+      "id": 5,
+      "title": "Iron Meridian",
+      "genre": "Action",
+      "language": "Hindi",
+      "runtime": "2h 35m",
+      "certificate": "UA16+",
+      "rating": 4.8
+    },
+    {
+      "id": 6,
+      "title": "Paper Boats",
+      "genre": "Romance",
+      "language": "Kashmiri",
+      "runtime": "1h 58m",
+      "certificate": "U",
+      "rating": 4.1
+    },
+    {
+      "id": 7,
+      "title": "Orbit Zero",
+      "genre": "Sci-Fi",
+      "language": "English",
+      "runtime": "2h 15m",
+      "certificate": "UA13+",
+      "rating": 4.5
+    },
+    {
+      "id": 8,
+      "title": "Glasshouse",
+      "genre": "Drama",
+      "language": "Hindi",
+      "runtime": "2h 08m",
+      "certificate": "UA16+",
+      "rating": 4.0
+    }
+  ],
+  "upcoming": [
+    {
+      "id": 9,
+      "title": "Marble Season",
+      "genre": "Drama",
+      "language": "Hindi",
+      "releaseNote": "Releases Aug 14"
+    },
+    {
+      "id": 10,
+      "title": "Northern Wind",
+      "genre": "Thriller",
+      "language": "Urdu",
+      "releaseNote": "Releases Aug 21"
+    },
+    {
+      "id": 11,
+      "title": "Last Reel",
+      "genre": "Comedy",
+      "language": "English",
+      "releaseNote": "Releases Sep 3"
+    },
+    {
+      "id": 12,
+      "title": "Valley of Glass",
+      "genre": "Sci-Fi",
+      "language": "Kashmiri",
+      "releaseNote": "Releases Sep 10"
+    }
+  ]
+}

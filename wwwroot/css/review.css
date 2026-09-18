@@ -1,0 +1,225 @@
+.booking-page {
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    overflow: hidden;
+    padding: 72px 20px 88px;
+    color: var(--review-text);
+    background:
+        radial-gradient(circle at 15% 4%, color-mix(in srgb, var(--review-red) 22%, transparent), transparent 28rem),
+        radial-gradient(circle at 92% 78%, color-mix(in srgb, var(--review-gold) 12%, transparent), transparent 26rem),
+        var(--review-bg);
+    font-family: 'Work Sans', sans-serif;
+}
+
+/*.booking-page::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;*/
+/*    background-image: linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);*/
+    /*background-size: 34px 34px;
+    content: '';*/
+/*    mask-image: linear-gradient(to bottom, black, transparent 78%);*/
+/*}*/
+
+.booking-summary-container {
+    width: min(100%, 850px);
+    margin: 0 auto;
+}
+
+.page-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px;
+    color: var(--review-gold);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.page-label::before {
+    width: 26px;
+    height: 1px;
+    background: currentColor;
+    content: '';
+}
+
+.page-title {
+    margin: 0 0 34px;
+    color: var(--review-text);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 7vw, 4.7rem);
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    line-height: 0.9;
+}
+
+.movie-info-row {
+    position: relative;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 26px;
+    padding: 22px;
+    overflow: hidden;
+    border: 1px solid var(--review-line);
+    border-radius: 18px;
+    background: linear-gradient(115deg, var(--review-surface-light), var(--review-surface));
+    box-shadow: 0 22px 52px var(--shadow-color);
+}
+
+/*.movie-info-row::after {
+    position: absolute;
+    top: -70px;
+    right: -35px;
+    width: 165px;
+    height: 165px;
+    border: 1px solid rgba(242, 200, 117, 0.13);
+    border-radius: 50%;
+    content: '';
+}*/
+
+.movie-thumb {
+    z-index: 1;
+    width: 100px;
+    height: 142px;
+    border: 2px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--review-surface-light);
+/*    box-shadow: 8px 11px 0 rgba(0, 0, 0, 0.24);*/
+    object-fit: cover;
+}
+.movie-thumb-placeholder { display: grid; place-items: center; color: var(--review-gold); font-family: 'Bebas Neue', sans-serif; font-size: 3rem; background: linear-gradient(145deg, var(--curtain-red-light), var(--review-surface)); }
+
+.movie-details { z-index: 1; }
+
+.movie-name {
+    margin: 0 0 12px;
+    color: var(--review-gold);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(1.9rem, 5vw, 2.5rem);
+    font-weight: 400;
+    letter-spacing: 0.035em;
+    line-height: 1;
+}
+
+.show-meta {
+    margin: 5px 0;
+    color: var(--review-muted);
+    font-size: 0.92rem;
+}
+
+.summary-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: 22px;
+    align-items: start;
+}
+
+.seats-section,
+.price-box {
+    border: 1px solid var(--review-line);
+    border-radius: 18px;
+    background: var(--surface-overlay);
+    /*    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.16);*/
+}
+
+.seats-section { padding: 22px; }
+
+.seats-heading {
+    margin: 0 0 13px;
+    color: var(--review-gold-soft);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.seat-row {
+    display: grid;
+    grid-template-columns: 58px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    min-height: 48px;
+    border-bottom: 1px solid var(--review-line);
+    font-size: 0.9rem;
+}
+
+.seat-row:last-child { border-bottom: 0; }
+
+.seat-number {
+    display: inline-flex;
+    justify-content: center;
+    width: fit-content;
+    min-width: 42px;
+    padding: 5px 8px;
+    border: 1px solid var(--border-strong);
+    border-radius: 5px;
+    color: var(--review-gold);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.seat-category { color: var(--review-muted); }
+.seat-price { color: var(--review-text); font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; }
+
+.price-box {
+    padding: 22px;
+/*    border-top: 2px solid ;*/
+    background: linear-gradient(155deg, var(--review-surface-light), var(--review-surface));
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 9px 0;
+    color: var(--review-muted);
+    font-size: 0.88rem;
+}
+
+.price-row span:last-child { color: var(--review-text); font-family: 'JetBrains Mono', monospace; }
+.price-divider { margin: 12px 0 5px; border: 0; border-top: 1px dashed var(--border-strong); }
+.total-row { padding-top: 11px; color: var(--review-text); font-size: 1.1rem; }
+.total-row strong:last-child { color: var(--review-gold); font-family: 'JetBrains Mono', monospace; }
+
+.action-buttons {
+    display: flex;
+    gap: 14px;
+    margin-top: 28px;
+}
+
+.btn-edit-seats,
+.btn-pay {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+    padding: 13px 20px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease;
+}
+
+.btn-edit-seats { border: 1px solid var(--border-strong); color: var(--review-gold); background: var(--surface-highlight); }
+.btn-pay { border: 1px solid var(--gold); color: var(--on-accent); background: var(--gold) }
+.btn-edit-seats:hover, .btn-pay:hover { color: inherit; transform: translateY(-2px); }
+.btn-edit-seats:hover { border-color: var(--review-gold); background: var(--surface-raised); }
+.btn-pay:hover { color: var(--on-accent); background: var(--gold-soft);  }
+/*.btn-edit-seats:focus-visible, .btn-pay:focus-visible { outline: 3px solid rgba(242, 200, 117, 0.52); outline-offset: 3px; }*/
+
+@media (max-width: 640px) {
+    .booking-page { padding: 48px 16px 64px; }
+    .movie-info-row { gap: 17px; padding: 17px; }
+    .movie-thumb { width: 76px; height: 108px; }
+    .summary-body { grid-template-columns: 1fr; }
+    .action-buttons { flex-direction: column-reverse; }
+}

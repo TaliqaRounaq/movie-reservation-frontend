@@ -1,0 +1,17 @@
+@model CineBook.Models.Movie
+<div class="col-6 col-md-3 movie-item" data-title="@Model.Title" data-genre="@Model.Genre" data-language="@Model.Language">
+    <a asp-controller="Movies" asp-action="Details" asp-route-id="@Model.Id"  class="cb-movie-card-link">
+        <div class="cb-movie-card">
+            <div class="cb-poster @(string.IsNullOrEmpty(Model.PosterUrl) ? $"cb-poster-{Model.Id}" : "")"
+                 style="@(string.IsNullOrEmpty(Model.PosterUrl) ? "" : $"background-image:url('{Model.PosterUrl}');background-size:cover;background-position:center;")">
+                <span class="cb-poster-badge">@Model.Genre</span>
+                <span class="cb-poster-rating">&#9733; @Model.Rating</span>
+                <div class="cb-poster-copy">
+                    <div class="cb-poster-kicker">Now playing</div>
+                    <div class="cb-poster-title">@Model.Title</div>
+                </div>
+            </div>
+            <div class="cb-card-meta">@Model.Language &middot; @Model.Runtime &middot; @Model.Certificate</div>
+        </div>
+    </a>
+</div>

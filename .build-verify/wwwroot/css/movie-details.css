@@ -1,0 +1,212 @@
+/* ---------- MOVIE DETAILS ---------- */
+.cb-detail-wrap {
+	padding-top: var(--sp-4);
+	padding-bottom: var(--sp-8);
+}
+
+.cb-detail-hero {
+	display: flex;
+	gap: var(--sp-4);
+	background: linear-gradient(135deg, var(--curtain-red) 0%, var(--velvet-900) 75%);
+	border: 1px solid var(--border-soft);
+	border-radius: 20px;
+	padding: var(--sp-4);
+	margin-bottom: var(--sp-6);
+}
+
+.cb-detail-poster {
+	position: relative;
+	width: 220px;
+	min-width: 220px;
+	height: 320px;
+	border-radius: var(--radius);
+	background: linear-gradient(160deg, var(--velvet-700), var(--velvet-950));
+	border: 1px solid var(--border-soft);
+}
+
+.cb-detail-rating {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	background: var(--surface-overlay);
+	padding: 4px 10px;
+	border-radius: 6px;
+	font-size: 13px;
+	font-family: 'JetBrains Mono', monospace;
+	color: var(--gold-soft);
+}
+
+.cb-detail-info {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: var(--sp-2);
+}
+
+.cb-detail-chips {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.cb-chip {
+	background: var(--surface-overlay-subtle);
+	border: 1px solid var(--border-soft);
+	padding: 5px 12px;
+	border-radius: 20px;
+	font-size: var(--fs-small);
+	color: var(--text-secondary);
+}
+
+.cb-detail-title {
+	font-family: 'Bebas Neue', sans-serif;
+	font-size: 48px;
+	line-height: 1;
+	letter-spacing: 0.5px;
+	margin: 8px 0 0;
+}
+.cb-hero-cta {
+	display: inline-flex;
+	align-items: center;
+	height: 48px;
+	padding: 0 24px;
+	background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+	color: var(--on-accent);
+	border-radius: var(--radius-sm);
+	font-size: var(--fs-button);
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+}
+
+.cb-detail-section {
+	background: var(--velvet-900);
+	border: 1px solid var(--border-soft);
+	border-radius: var(--radius);
+	padding: var(--sp-3) var(--sp-4);
+	margin-bottom: var(--sp-3);
+}
+
+	.cb-detail-section .cb-section-title {
+		margin-bottom: var(--sp-2);
+	}
+
+.cb-detail-about {
+	color: var(--text-secondary);
+	line-height: 1.7;
+}
+
+.cb-cast-grid {
+	display: flex;
+	gap: var(--sp-2);
+	flex-wrap: wrap;
+}
+
+.cb-cast-chip {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	background: var(--velvet-800);
+	border: 1px solid var(--border-soft);
+	padding: 6px 14px 6px 6px;
+	border-radius: 24px;
+	font-size: var(--fs-small);
+	color: var(--text-secondary);
+}
+
+.cb-cast-avatar {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, var(--gold-soft), var(--curtain-red-light));
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--on-accent);
+}
+
+.cb-crew-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.cb-crew-item {
+	color: var(--text-secondary);
+	font-size: var(--fs-body);
+}
+
+.cb-showtime-card {
+	background: var(--velvet-800);
+	border: 1px solid var(--border-soft);
+	border-radius: var(--radius-sm);
+	padding: var(--sp-2) var(--sp-3);
+	margin-bottom: var(--sp-2);
+}
+
+.cb-showtime-head {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 10px;
+}
+
+.cb-showtime-name {
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+.cb-showtime-date {
+	color: var(--text-muted);
+	font-size: var(--fs-small);
+}
+
+.cb-showtime-times {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.cb-time-pill {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 36px;
+	background: var(--velvet-700);
+	border: 1px solid var(--border-soft);
+	padding: 6px 14px;
+	border-radius: 8px;
+	font-size: var(--fs-small);
+	color: var(--gold-soft);
+	cursor: pointer;
+	text-decoration: none;
+	transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+	.cb-time-pill:hover {
+		background: var(--velvet-900);
+		border-color: var(--gold);
+		color: var(--gold);
+		transform: translateY(-1px);
+	}
+
+	.cb-time-pill:focus-visible {
+		outline: 2px solid var(--gold);
+		outline-offset: 2px;
+	}
+
+@media (max-width: 700px) {
+	.cb-detail-hero {
+		flex-direction: column;
+	}
+
+	.cb-detail-poster {
+		width: 100%;
+		height: 280px;
+	}
+
+	.cb-detail-title {
+		font-size: 36px;
+	}
+}

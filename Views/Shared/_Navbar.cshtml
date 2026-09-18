@@ -1,0 +1,155 @@
+@{
+    var userName = Context.Session.GetString("UserName");
+    var userEmail = Context.Session.GetString("UserEmail");
+    var isLoggedIn = Context.Session.GetString("JwtToken") != null;
+    string initials = "";
+
+    if (!string.IsNullOrEmpty(userName))
+    {
+        var parts = userName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        initials = parts.Length > 0 ? parts[0][0].ToString() : "";
+        if (parts.Length > 1)
+        {
+      initials       += parts[^1][0].ToString();
+        }
+        initials = initials.ToUpper();
+    }
+
+    var authJson = System.Text.Json.JsonSerializer.Serialize(new { isLoggedIn, name = userName, email = userEmail });
+    var savedCityName = Context.Request.Cookies["cinego-city-name"];
+}
+
+<header class="cb-header">
+    <div class="container cb-header-inner">
+        <a asp-controller="Home" asp-action="Index" class="cb-logo" aria-label="CineGo home">CINE<span>GO</span></a>
+
+        <nav class="cb-primary-nav" aria-label="Main navigation">
+            <a asp-controller="Home" asp-action="Index" class="active">Movies</a>
+            <a asp-controller="Theatres" asp-action="Index">Cinemas</a>
+        </nav>
+
+        <div class="d-flex align-items-center gap-3">
+        <div class="dropdown">
+        <button class="cb-location-pill" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D9A94E" stroke-width="2"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        <span id="selected-location">@(string.IsNullOrEmpty(savedCityName) ? "Select City" : savedCityName)</span>
+        </button>
+          <ul class="dropdown-menu cb-filter-menu" id="cityDropdownMenu">
+         </ul>
+    </div>
+            <button id="avatarBtn" class="cb-account cb-account-button" type="button" aria-label="Open your dashboard" aria-controls="dashboardPanel" aria-expanded="false">
+                <span class="cb-avatar" id="indexAvatar">
+                    @if (isLoggedIn)
+                    {
+                        @initials
+                    }
+                    else
+                    {
+                        <i class="bi bi-person"></i>
+                    }
+                </span>
+            </button>
+            <div id="guestPrompt" class="cb-guest-prompt d-none">
+            <a href="/Account/Login" id="guestLoginLink">Click here to login/register</a>
+            </div>
+            <button id="cb-theme-toggle" class="cb-theme-toggle" aria-label="Toggle theme">
+                   <i class="bi bi-moon" id="cb-theme-icon"></i>
+            </button>
+        </div>
+        
+    </div>
+</header>
+
+
+
+<script>
+    window.CineBookAuth = @Html.Raw(authJson);
+
+    let selectedCityId = null;
+    function setCityCookies(cityId, cityName) {
+    document.cookie = `cinego-city-id=${cityId}; path=/; max-age=${60 * 60 * 24 * 365}`;
+    document.cookie = `cinego-city-name=${encodeURIComponent(cityName)}; path=/; max-age=${60 * 60 * 24 * 365}`;
+    }
+    function updateCityTexts(cityName) {
+    const heroSpan = document.getElementById('heroCityName');
+    if (heroSpan) heroSpan.textContent = cityName;
+
+    const footerSpan = document.getElementById('footerCityName');
+    if (footerSpan) footerSpan.textContent = cityName;
+
+    const theatreSpan = document.getElementById('theatreCityName');
+    if (theatreSpan) theatreSpan.textContent = cityName;
+}
+    function getCityCookie() {
+    const match = document.cookie.match(/(?:^|; )cinego-city-id=([^;]*)/);
+    return match ? match[1] : null;
+    }
+
+    function loadTheatresForCity(cityId) {
+        fetch(`/Home/GetTheatresByCity?cityId=${cityId}`)
+            .then(response => response.json())
+            .then(theatres => {
+                const track = document.getElementById('theatreTrack');
+                if (!track) return;
+
+                track.innerHTML = '';
+
+                if (theatres.length === 0) {
+                    track.innerHTML = '<p class="text-secondary">No theatres found in this city yet.</p>';
+                    return;
+                }
+
+                theatres.forEach(theatre => {
+                    const link = document.createElement('a');
+                    link.href = `/Theatres/Details?theatreId=${theatre.id}`;
+                    link.className = 'theatre-card theatre-card-link';
+                    link.innerHTML = `<h3 class="theatre-name">${theatre.name}</h3><p class="theatre-area">${theatre.area}</p>`;
+                    track.appendChild(link);
+                });
+            })
+            .catch(err => console.error('Failed to load theatres:', err));
+    }
+
+    fetch('/Home/GetCities')
+        .then(response => response.json())
+        .then(cities => {
+            const menu = document.getElementById('cityDropdownMenu');
+            menu.innerHTML = '';
+
+            cities.forEach(city => {
+                const li = document.createElement('li');
+                const btn = document.createElement('button');
+                btn.className = 'dropdown-item location-option';
+                btn.type = 'button';
+                btn.textContent = city.name;
+                btn.dataset.cityId = city.cityId;
+
+                btn.addEventListener('click', function () {
+                document.getElementById('selected-location').textContent = city.name;
+                setCityCookies(city.cityId, city.name);
+                updateCityTexts(city.name);   // ← naya
+                selectedCityId = city.cityId;
+                loadTheatresForCity(city.cityId);
+                document.dispatchEvent(new CustomEvent('cinego:cityChanged', { detail: { cityId: city.cityId, source: 'user' } }));
+             });
+
+                li.appendChild(btn);
+                menu.appendChild(li);
+            });
+
+           const savedCityId = getCityCookie();
+            const savedCity = savedCityId ? cities.find(c => c.cityId === parseInt(savedCityId)) : null;
+
+            if (savedCity) {
+                selectedCityId = savedCity.cityId;
+                setCityCookies(selectedCityId, savedCity.name);
+                document.dispatchEvent(new CustomEvent('cinego:cityChanged', { detail: { cityId: selectedCityId, source: 'initial' } }));
+            } else if (cities.length > 0) {
+                document.getElementById('selected-location').textContent = cities[0].name;
+                selectedCityId = cities[0].cityId;
+                setCityCookies(selectedCityId , cities[0].name);
+                document.dispatchEvent(new CustomEvent('cinego:cityChanged', { detail: { cityId: selectedCityId, source: 'initial' } }));
+          }
+            })
+        .catch(err => console.error('Failed to load cities:', err));
+</script>

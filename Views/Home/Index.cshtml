@@ -1,0 +1,169 @@
+@model CineBook.Models.HomeViewModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<partial name ="_Navbar" model = "Model"/>
+
+<main class="container cb-home" id="movie-browser">
+
+    @if (Model.ErrorMessages.Any())
+    {
+        <div class="alert alert-warning" role="alert">
+            @foreach (var message in Model.ErrorMessages)
+            {
+                <p class="mb-0">@message</p>
+            }
+        </div>
+    }
+
+   <form class="cb-search-row movie-search-form" asp-controller="Home" asp-action="Search" method="get">
+    <div class="cb-search-box">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C6C72" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="search" name="q" class="cb-search-input" placeholder="Search movies, cinemas, events" aria-label="Search movies">
+    </div>
+
+    <div class="dropdown">
+        <button class="cb-filter-chip" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Genre
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+
+        <ul class="dropdown-menu cb-filter-menu">
+             @foreach (var genre in Model.Genres)
+        {
+            <li><button class="dropdown-item movie-filter" type="submit" name="genre" value="@genre">@genre</button></li>
+        }
+        </ul>
+    </div>
+
+    <div class="dropdown">
+        <button class="cb-filter-chip" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Actor
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <ul class="dropdown-menu cb-filter-menu">
+            @foreach (var actor in Model.Actors)
+        {
+            <li><button class="dropdown-item" type="button" disabled>@actor</button></li>
+        }
+        </ul>
+    </div>
+
+
+    <div class="dropdown">
+        <button class="cb-filter-chip" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Language
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <ul class="dropdown-menu cb-filter-menu">
+            @foreach (var language in Model.Languages)
+        {
+            <li><button class="dropdown-item movie-filter" type="submit" name="language" value="@language">@language</button></li>
+        }
+        </ul>
+    </div>
+</form>
+    
+
+    <div class="cb-hero">
+        <div class="cb-hero-art" aria-hidden="true"><span>WELCOME</span><span>TO THE</span><span>JUNGLE</span></div>
+        <div class="cb-hero-content">
+            <div class="cb-hero-eyebrow"><i></i> Now trending in <span id="heroCityName">@(ViewData["SelectedCityName"] ?? "your city")</span></div>
+            <h1 class="cb-hero-title">Welcome to the Jungle</h1>
+            <div class="cb-hero-meta">UA 16+ &middot; 2h 45m &middot; Comedy &middot; Hindi</div>
+            <a asp-controller="Movies" asp-action="Details" asp-route-id="1" class="cb-hero-cta">Book tickets <span>&rarr;</span></a>
+        </div>
+        <div class="cb-hero-dots"><span class="active"></span><span></span><span></span><span></span></div> 
+    </div>
+
+    <section class="mb-5">
+        <div class="cb-section-head">
+            <div><div class="cb-section-overline">The big screen awaits</div><div class="cb-section-title">Now showing</div></div>
+            <button class="cb-section-link view-all" type="button">View all <span>&rarr;</span></button>
+        </div>
+
+        <div class="row g-3">
+            @foreach (var movie in Model.NowShowing)
+            {
+                <partial name ="_MoviesCard" model="movie"/>
+            }
+        </div>
+
+    </section>
+
+    <section id="recommended-section" class="mb-5 d-none">
+        <div class="cb-section-head">
+            <div><div class="cb-section-overline">Picked for you</div><div class="cb-section-title">Recommended</div></div>
+            <button class="cb-section-link view-all" type="button">View all <span>&rarr;</span></button>
+        </div>
+        <div class="row g-3">
+            @foreach (var movie in Model.Recommended)
+            {
+               <partial name ="_MoviesCard" model="movie"/>
+            }
+        </div>
+    </section>
+
+    <section class="mb-5">
+    <div class="cb-section-head">
+        <div><div class="cb-section-overline">Save the date</div><div class="cb-section-title">Upcoming</div></div>
+        <button class="cb-section-link view-all" type="button">View all <span>&rarr;</span></button>
+    </div>
+    <div class="row g-3">
+    @foreach (var movie in Model.Upcoming)
+    {
+        <div class="col-6 col-md-3 movie-item" data-title="@movie.Title" data-genre="@movie.Genre" data-language="@movie.Language">
+            <a asp-controller="Movies" asp-action="Details" asp-route-id="@movie.Id" class="cb-movie-card-link">
+                <div class="cb-movie-card">
+                    <div class="cb-poster @(string.IsNullOrEmpty(movie.PosterUrl) ? $"cb-poster-{movie.Id}" : "")"
+                         style="@(string.IsNullOrEmpty(movie.PosterUrl) ? "" : $"background-image:url('{movie.PosterUrl}');background-size:cover;background-position:center;")">
+                        <span class="cb-poster-badge">@movie.ReleaseNote</span>
+                        <div class="cb-poster-copy"><div class="cb-poster-kicker">Coming soon</div><div class="cb-poster-title">@movie.Title</div></div>
+                    </div>
+                    <div class="cb-card-meta">@movie.Language &middot; @movie.Genre</div>
+                </div>
+            </a>
+        </div>
+    }
+</div>
+</section>
+
+</main>
+<p id="movie-empty" class="container text-center text-secondary d-none" role="status">No movies match those filters. Try another search.</p>
+<partial name="_TheatresSlider" model="Model.NearbyTheatres" />
+<footer class="cb-footer">
+    <div class="container">
+        <div class="cb-footer-top">
+            <div class="cb-footer-brand">
+                <div class="cb-logo">CINEGO</div>
+                <p>Book the seat you actually want, at the cinemas you already love — right here in <span id="footerCityName">@(ViewData["SelectedCityName"] ?? "your city")</span>.</p>
+            </div>
+            <div class="d-flex gap-5 flex-wrap">
+                <div class="cb-footer-col">
+                    <h4>Company</h4>
+                    <a href="#">About us</a>
+                    <a href="#">Careers</a>
+                    <a href="#">Cinemas near you</a>
+                </div>
+                <div class="cb-footer-col">
+                    <h4>Support</h4>
+                    <a href="#">Help centre</a>
+                    <a href="#">Contact us</a>
+                    <a href="#">Refund policy</a>
+                </div>
+                <div class="cb-footer-col">
+                    <h4>Legal</h4>
+                    <a href="#">Privacy policy</a>
+                    <a href="#">Terms and conditions</a>
+                </div>
+            </div>
+        </div>
+        <div class="cb-footer-bottom">
+            <span>&copy; 2026 CineGo. All rights reserved.</span>
+            <span>Made in Srinagar</span>
+        </div>
+    </div>
+</footer>
+@await Component.InvokeAsync("DashboardPanel")
+<script src="~/js/home.js" asp-append-version="true"></script>

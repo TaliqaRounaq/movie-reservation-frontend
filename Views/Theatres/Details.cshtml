@@ -1,0 +1,92 @@
+@model CineBook.Models.TheatreDetailsViewModel
+@{
+    ViewData["Title"] = Model.Theatre.Name;
+}
+<link rel="stylesheet" href="~/css/theatre-details.css" asp-append-version="true" />
+<partial name="_Navbar" />
+
+<main class="td-page">
+    <section class="td-hero" aria-labelledby="theatre-name">
+        <div class="container td-hero-inner">
+            <a asp-controller="Home" asp-action="Index" class="td-back-link"><span>&larr;</span> Back to movies</a>
+            <div class="td-hero-grid">
+                <div class="td-hero-copy">
+                    <div class="td-eyebrow"><i></i> Your cinema for today</div>
+                    <h1 id="theatre-name">@Model.Theatre.Name</h1>
+                    <p class="td-location">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                        @Model.Theatre.Area, Srinagar
+                    </p>
+                    <div class="td-amenities">
+                        <span>Dolby Atmos</span><span>Food &amp; beverages</span><span>Wheelchair access</span>
+                    </div>
+                </div>
+                <aside class="td-info-card">
+                    <div><small>OPEN TODAY</small><strong>10:00 AM – 11:30 PM</strong></div>
+                    <div><small>NOW SHOWING</small><strong>@Model.Movies.Count films</strong></div>
+                    <a href="#showtimes">See showtimes <span>&darr;</span></a>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <section class="td-schedule container" id="showtimes" aria-labelledby="schedule-title">
+        <div class="td-schedule-heading">
+            <div>
+                <div class="td-eyebrow">Plan your visit</div>
+                <h2 id="schedule-title">Choose a showtime</h2>
+            </div>
+            <p>Times shown for <strong>@Model.SelectedDate.ToString("dddd, d MMMM")</strong></p>
+        </div>
+
+        <nav class="td-date-tabs" aria-label="Choose a date">
+            @foreach (var date in Model.AvailableDates)
+            {
+                var activeClass = date.Date == Model.SelectedDate.Date ? "active" : "";
+                var label = date.Date == DateTime.Today ? "Today" : date.Date == DateTime.Today.AddDays(1) ? "Tomorrow" : date.ToString("dddd");
+                <a asp-controller="Theatres" asp-action="Details" asp-route-theatreId="@Model.Theatre.Id" asp-route-date="@date.ToString("yyyy-MM-dd")" class="td-date-tab @activeClass" aria-current="@(activeClass == "active" ? "date" : null)">
+                    <span>@date.ToString("ddd")</span>
+                    <strong>@date.ToString("dd")</strong>
+                    <small>@label</small>
+                </a>
+            }
+        </nav>
+
+        <div class="td-showtime-list">
+            @foreach (var item in Model.Movies)
+            {
+                <article class="td-movie-card">
+                    <div class="td-poster td-poster-@item.Movie.Id" aria-hidden="true">
+                        <span>@item.Movie.Genre</span>
+                        <b>@item.Movie.Title</b>
+                    </div>
+                    <div class="td-movie-content">
+                        <div class="td-movie-topline">
+                            <div>
+                                <div class="td-rating">★ @item.Movie.Rating</div>
+                                <h3>@item.Movie.Title</h3>
+                            </div>
+                            <span class="td-certificate">@item.Movie.Certificate</span>
+                        </div>
+                        <p>@item.Movie.Runtime <i></i> @item.Movie.Genre <i></i> @item.Movie.Language</p>
+                        <div class="td-times-label">Select a showtime</div>
+                        <div class="td-showtimes">
+                            @foreach (var showtime in item.Showtimes)
+                            {
+                                <a asp-controller="Seats" asp-action="Index" asp-route-showtimeId="@showtime.Id" class="td-showtime" 
+                                aria-label="Book @item.Movie.Title at @showtime.StartTime.ToString("h:mm tt")">
+                                    <strong>@showtime.StartTime.ToString("h:mm tt")</strong><small>@showtime.Screen</small>
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </article>
+            }
+        </div>
+        <p class="td-note">Showtime availability and prices may change. Tap a time to choose your seats.</p>
+    </section>
+    @await Component.InvokeAsync("DashboardPanel")
+<script src="~/js/home.js" asp-append-version="true"></script>
+@await Component.InvokeAsync("DashboardPanel")
+<script src="~/js/dashboard.js" asp-append-version="true"></script>
+</main>

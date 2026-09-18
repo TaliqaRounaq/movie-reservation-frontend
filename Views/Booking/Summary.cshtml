@@ -1,0 +1,84 @@
+@model CineBook.Models.BookingSummaryViewModel
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Review your booking";
+}
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="~/css/review.css" />
+<partial name ="_Navbar" model = "Model"/>
+
+
+<div class="booking-page">
+    <div class="booking-summary-container">
+        <p class="page-label">Booking confirmation</p>
+        <h1 class="page-title">Review your booking</h1>
+
+        <div class="movie-info-row">
+            <div class="movie-thumb movie-thumb-placeholder" aria-label="Poster placeholder for @Model.MovieName">@Model.MovieName.Substring(0, 1)</div>
+            <div class="movie-details">
+                <h2 class="movie-name">@Model.MovieName</h2>
+                <p class="show-meta">@Model.ShowDate.ToString("dd MMM"), @Model.ShowTime</p>
+                <p class="show-meta">@Model.TheatreName, @Model.ScreenName</p>
+            </div>
+        </div>
+
+        <div class="summary-body">
+            <div class="seats-section">
+                <p class="seats-heading">Seats (@Model.SelectedSeats.Count)</p>
+
+                @foreach (var seat in Model.SelectedSeats)
+                {
+                    <div class="seat-row">
+                        <span class="seat-number">@seat.SeatLabel</span>
+                        <span class="seat-category">@seat.Tier</span>
+                        <span class="seat-price">$@seat.Price</span>
+                    </div>
+                }
+            </div>
+
+            <div class="price-box">
+                <div class="price-row">
+                    <span>Subtotal</span>
+                    <span>$@Model.Subtotal</span>
+                </div>
+                <div class="price-row">
+                    <span>Booking fee</span>
+                    <span>$@Model.BookingFee</span>
+                </div>
+                <div class="price-row">
+                    <span>GST</span>
+                    <span>$@Model.GST</span>
+                </div>
+                <hr class="price-divider" />
+                <div class="price-row total-row">
+                    <strong>Total</strong>
+                    <strong>$@Model.Total</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a asp-controller="Seats" asp-action="Index"
+               asp-route-showtimeId="@Model.ShowtimeId"
+               asp-route-seatCount="@Model.SelectedSeats.Count"
+               asp-route-preSelected="@string.Join(",", Model.SelectedSeats.Select(s => s.ShowSeatId))"
+               class="btn-edit-seats">Edit Seats</a>
+
+            <a asp-controller="Payment" asp-action="Index"
+               asp-route-showtimeId="@Model.ShowtimeId"
+               asp-route-showSeatIds="@string.Join(",", Model.SelectedSeats.Select(s => s.ShowSeatId))"
+               asp-route-seats="@string.Join(",", Model.SelectedSeats.Select(s => s.SeatLabel))"
+               asp-route-movieName="@Model.MovieName"
+               asp-route-theatreName="@Model.TheatreName"
+               asp-route-hallName="@Model.ScreenName"
+               asp-route-showDate="@Model.ShowDate.ToString("yyyy-MM-dd")"
+               asp-route-showTime="@Model.ShowTime"
+               asp-route-amount="@Model.Total"
+               class="btn-pay">Pay $@Model.Total</a>
+        </div>
+    </div>
+</div>
+@await Component.InvokeAsync("DashboardPanel")
+<script src="~/js/dashboard.js" asp-append-version="true"></script>

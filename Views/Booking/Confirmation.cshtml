@@ -1,0 +1,37 @@
+@model BookingConfirmationViewModel
+<link rel="stylesheet" href="~/css/confirmation.css" />
+
+<div class="confirmation-wrapper">
+    <div class="confirmation-card">
+
+        <div class="success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="4 12 9 18 20 6"></polyline>
+            </svg>
+        </div>
+
+        <h1 class="confirmation-title">Booking Confirmed</h1>
+        <p class="confirmation-sub">You're all set</p>
+        <p class="confirmation-id">Confirmation ID: <span>@Model.ConfirmationId</span></p>
+
+        <div class="ticket-details">
+            <h3>Ticket Details</h3>
+            <div class="detail-row"><span>Movie</span><span>@Model.MovieName</span></div>
+            <div class="detail-row"><span>Theatre</span><span>@Model.TheatreName</span></div>
+            <div class="detail-row"><span>Hall</span><span>@Model.HallName</span></div>
+            <div class="detail-row"><span>Date</span><span>@Model.ShowDate</span></div>
+            <div class="detail-row"><span>Time</span><span>@Model.ShowTime</span></div>
+            <div class="detail-row"><span>Seats</span><span>@string.Join(", ", Model.Seats)</span></div>
+            <div class="detail-row total"><span>Amount Paid</span><span>$@Model.AmountPaid.ToString("0.00")</span></div>
+        </div>
+
+        <div class="confirmation-actions">
+            <button type="button" class="btn-outline" id="download-ticket">Download Ticket</button>
+            <a href="@Url.Action("Index", "Home")" class="btn-solid">Back to Home</a>
+        </div>
+
+    </div>
+</div>
+<script>
+document.getElementById('download-ticket')?.addEventListener('click', function () { window.print(); });
+</script>

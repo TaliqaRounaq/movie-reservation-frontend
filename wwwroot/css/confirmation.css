@@ -1,0 +1,124 @@
+.confirmation-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--void);
+    padding: 40px 20px;
+}
+
+.confirmation-card {
+    background: var(--velvet-900);
+    border: 1px solid var(--velvet-700);
+    border-radius: 16px;
+    padding: 40px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px var(--shadow-color);
+}
+
+.success-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--success), var(--success-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .success-icon svg {
+        width: 36px;
+        height: 36px;
+        color: var(--text-primary);
+    }
+
+.confirmation-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 1px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.confirmation-sub {
+    font-family: 'Work Sans', sans-serif;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.confirmation-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--curtain-red);
+    margin-bottom: 24px;
+}
+
+.ticket-details {
+    background: var(--velvet-800);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: left;
+    margin-bottom: 28px;
+}
+
+    .ticket-details h3 {
+        font-family: 'Work Sans', sans-serif;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        margin-bottom: 14px;
+    }
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-family: 'Work Sans', sans-serif;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--velvet-700);
+    font-size: 14px;
+}
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-row.total {
+        font-weight: 800;
+        color: var(--text-primary);
+        padding-top: 12px;
+        margin-top: 6px;
+        /*        border-top: 1px dashed var(--velvet-700);*/
+    }
+
+.confirmation-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-outline, .btn-solid {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-family: 'Work Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.btn-outline {
+    border: 1px solid var(--velvet-700);
+    color: var(--text-primary);
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+}
+
+.btn-solid {
+    background: var(--gold);
+    color: var(--on-accent);
+}

@@ -1,0 +1,30 @@
+@model CineBook.Models.PaymentViewModel
+@{ ViewData["Title"] = "Payment"; }
+<link rel="stylesheet" href="~/css/review.css" asp-append-version="true" />
+<partial name ="_Navbar" model = "Model"/>
+
+<main class="booking-page">
+  <section class="booking-summary-container" aria-labelledby="payment-title">
+    <p class="page-label">Demo checkout</p>
+    <h1 id="payment-title" class="page-title">Pay securely</h1>
+    @if (TempData["BookingError"] is string bookingError)
+    {
+      <p id="payment-server-error" class="text-danger small" role="alert">@bookingError</p>
+    }
+    @* <div class="price-box mb-4"><div class="price-row"><span>@Model.MovieName</span><span>$@Model.Amount.ToString("0.00")</span></div><div class="price-row"><span>Seats</span><span>@Model.Seats</span></div></div> *@
+    <form asp-action="Complete" method="post" class="price-box" id="payment-form" novalidate>
+      @Html.AntiForgeryToken()
+      <input type="hidden" asp-for="ShowtimeId" />
+       <input type="hidden" asp-for="ShowSeatIds" />
+      <input type="hidden" asp-for="HallId" /><input type="hidden" asp-for="HallName" /><input type="hidden" asp-for="MovieName" /><input type="hidden" asp-for="TheatreName" /><input type="hidden" asp-for="ShowDate" /><input type="hidden" asp-for="ShowTime" /><input type="hidden" asp-for="Seats" /><input type="hidden" asp-for="Amount" />
+      <label class="form-label" for="card-name">Name on card</label><input id="card-name" class="form-control mb-3" required autocomplete="cc-name" />
+      <label class="form-label" for="card-number">Card number</label><input id="card-number" class="form-control mb-3" required inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456" autocomplete="cc-number" />
+      <p id="payment-error" class="text-danger small" role="alert"></p>
+      <button class="btn-pay w-100" type="submit">Pay $@Model.Amount.ToString("0.00")</button>
+      <p class="show-meta mt-3 mb-0">Demo only — no payment details are stored.</p>
+    </form>
+  </section>
+</main>
+<script src="~/js/payment.js" asp-append-version="true"></script>
+@await Component.InvokeAsync("DashboardPanel")
+<script src="~/js/dashboard.js" asp-append-version="true"></script>

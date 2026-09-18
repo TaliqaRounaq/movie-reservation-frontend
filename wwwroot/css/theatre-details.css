@@ -1,0 +1,521 @@
+.td-page {
+    min-height: calc(100vh - 72px);
+    background: var(--void);
+}
+
+.td-hero {
+    position: relative;
+    overflow: hidden;
+    min-height: 360px;
+    border-bottom: 1px solid var(--border-soft);
+    background: linear-gradient(122deg, var(--velvet-950) 5%, var(--curtain-red) 51%, var(--curtain-red-light) 100%);
+    isolation: isolate;
+}  
+
+            .td-hero::before {
+                content: "";
+                position: absolute;
+                z-index: -1;
+                width: 520px;
+                height: 520px;
+                top: -225px;
+                right: 9%;
+                border: 42px solid var(--border-soft);
+                border-radius: 50%;
+                box-shadow: 0 0 0 38px var(--surface-highlight),0 0 0 90px var(--surface-highlight);
+            }
+
+    .td-hero::after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset: 0;
+        background: linear-gradient(90deg,var(--surface-overlay-subtle),transparent 74%);
+    }
+
+.td-hero-inner {
+    padding-top: 26px;
+    padding-bottom: 64px;
+}
+
+.td-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+    .td-back-link span {
+        font-size: 20px;
+    }
+
+    .td-back-link:hover {
+        color: var(--gold-soft);
+    }
+
+.td-hero-grid {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 40px;
+    margin-top: 67px;
+}
+
+.td-eyebrow {
+    color: var(--gold-soft);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+}
+
+    .td-eyebrow i {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        margin-right: 7px;
+        border-radius: 50%;
+        background: var(--gold);
+        box-shadow: 0 0 10px var(--gold);
+    }
+
+.td-hero h1 {
+    margin: 8px 0 10px;
+    font: 64px/.9 'Bebas Neue',sans-serif;
+    letter-spacing: 1.2px;
+    color: var(--text-primary);
+}
+
+.td-location {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+    .td-location svg {
+        width: 17px;
+        height: 17px;
+        color: var(--gold);
+    }
+
+.td-amenities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 22px;
+}
+
+    .td-amenities span {
+        padding: 6px 10px;
+        font-style:italic
+/*        border: 1px solid rgba(245,237,228,.18);*/
+/*        border-radius: 99px;*/
+/*        background: rgba(11,9,12,.22);*/
+        color: var(--text-secondary);
+        font-size: 11px;
+    }
+
+.td-info-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-width: 340px;
+    overflow: hidden;
+    border: 1px solid var(--border-soft);
+    border-radius: 12px;
+    background: var(--surface-overlay-subtle);
+    backdrop-filter: blur(8px);
+}
+
+    .td-info-card div {
+        padding: 16px;
+    }
+
+        .td-info-card div + div {
+            border-left: 1px solid var(--border-soft);
+        }
+
+    .td-info-card small {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--gold-soft);
+        font-size: 10px;
+        letter-spacing: .09em;
+    }
+
+    .td-info-card strong {
+        color: var(--text-primary);
+        font-size: 12px;
+    }
+
+    .td-info-card a {
+        grid-column: 1/-1;
+        display: flex;
+        justify-content: space-between;
+        padding: 11px 16px;
+        border-top: 1px solid var(--border-soft);
+        color: var(--text-primary);
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+        .td-info-card a:hover {
+            color: var(--gold-soft);
+        }
+
+.td-hero-marquee {
+    position: absolute;
+    right: -55px;
+    bottom: -24px;
+    z-index: -1;
+    color: var(--surface-highlight);
+    white-space: nowrap;
+    font: 92px/1 'Bebas Neue',sans-serif;
+    letter-spacing: 2px;
+}
+
+.td-schedule {
+    padding-top: 52px;
+    padding-bottom: 64px;
+}
+
+.td-schedule-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 23px;
+}
+
+.td-schedule h2 {
+    margin: 5px 0 0;
+    font: 38px/1 'Bebas Neue',sans-serif;
+    letter-spacing: .5px;
+}
+
+.td-schedule-heading p {
+    margin: 0 0 3px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+    .td-schedule-heading p strong {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+.td-date-tabs {
+    display: flex;
+    gap: 9px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 31px;
+}
+
+.td-date-tab {
+    display: flex;
+    flex: 0 0 82px;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    background: var(--velvet-950);
+    color: var(--text-muted);
+    transition: .2s ease;
+}
+
+    .td-date-tab:hover {
+        border-color: var(--border-strong);
+        color: var(--text-primary);
+        transform: translateY(-2px);
+    }
+
+    .td-date-tab span, .td-date-tab small {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: .07em;
+    }
+
+    .td-date-tab strong {
+        margin: 3px 0;
+        font: 29px/1 'Bebas Neue',sans-serif;
+        color: var(--text-primary);
+    }
+
+    .td-date-tab.active {
+        border-color: var(--gold);
+        background: linear-gradient(145deg,var(--curtain-red),var(--velvet-800));
+        box-shadow: 0 7px 20px var(--shadow-color);
+    }
+
+        .td-date-tab.active strong, .td-date-tab.active small {
+            color: var(--gold-soft);
+        }
+
+.td-showtime-list {
+    display: grid;
+    gap: 14px;
+}
+
+.td-movie-card {
+    display: flex;
+    gap: 22px;
+    padding: 18px;
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    background: linear-gradient(100deg,var(--velvet-900),var(--velvet-950));
+    transition: border .2s ease,transform .2s ease;
+}
+
+    .td-movie-card:hover {
+        border-color: var(--border-strong);
+        transform: translateY(-2px);
+    }
+
+.td-poster {
+    position: relative;
+    display: flex;
+    flex: 0 0 112px;
+    min-height: 148px;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    padding: 11px;
+    border-radius: 9px;
+    background: linear-gradient(145deg,#9a5737,#211221);
+}
+
+    .td-poster::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 75% 18%,rgba(255,226,149,.9),transparent 13%),linear-gradient(transparent 42%,rgba(10,7,8,.85));
+    }
+
+.td-poster-2 {
+    background: linear-gradient(145deg,#477ba2,#17243b);
+}
+
+.td-poster span, .td-poster b {
+    z-index: 1;
+}
+
+.td-poster span {
+    margin-bottom: 3px;
+    color: var(--gold-soft);
+    font-size: 9px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+}
+
+.td-poster b {
+    font: 21px/.96 'Bebas Neue',sans-serif;
+    letter-spacing: .2px;
+    color: var(--text-primary);
+}
+
+.td-movie-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.td-movie-topline {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.td-rating {
+    margin: 1px 0 5px;
+    color: var(--gold-soft);
+    font-size: 12px;
+}
+
+.td-movie-content h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.td-certificate {
+    height: max-content;
+    padding: 3px 7px;
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+.td-movie-content p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 5px 0 18px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+    .td-movie-content p i {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: var(--curtain-red-light);
+    }
+
+.td-times-label {
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.td-showtimes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.td-showtime {
+    display: flex;
+    min-width: 88px;
+    flex-direction: column;
+    padding: 9px 11px;
+    border: 1px solid var(--border-strong);
+    border-radius: 7px;
+    background: var(--velvet-800);
+    color: var(--text-primary);
+    transition: .2s ease;
+}
+
+    .td-showtime:hover {
+        border-color: var(--gold);
+        background: var(--velvet-700);
+        color: var(--gold-soft);
+        transform: translateY(-1px);
+    }
+
+    .td-showtime strong {
+        font: 13px 'JetBrains Mono',monospace;
+    }
+
+    .td-showtime small {
+        margin-top: 3px;
+        color: var(--text-muted);
+        font-size: 10px;
+    }
+
+.td-note {
+    margin: 20px 0 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+@media (max-width:768px) {
+    .td-hero {
+        min-height: 330px;
+    }
+
+    .td-hero-inner {
+        padding-bottom: 42px;
+    }
+
+    .td-hero-grid {
+        align-items: flex-start;
+        flex-direction: column;
+        margin-top: 46px;
+    }
+
+    .td-hero h1 {
+        font-size: 52px;
+    }
+
+    .td-info-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .td-schedule {
+        padding-top: 38px;
+    }
+
+    .td-schedule-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .td-movie-card {
+        gap: 14px;
+        padding: 13px;
+    }
+
+    .td-poster {
+        flex-basis: 88px;
+        min-height: 126px;
+    }
+
+        .td-poster b {
+            font-size: 18px;
+        }
+
+    .td-movie-content h3 {
+        font-size: 17px;
+    }
+
+    .td-movie-content p {
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-bottom: 14px;
+    }
+
+    .td-showtime {
+        min-width: 78px;
+    }
+}
+
+@media (max-width:450px) {
+    .td-hero h1 {
+        font-size: 45px;
+    }
+
+    .td-amenities span:last-child {
+        display: none;
+    }
+
+    .td-schedule h2 {
+        font-size: 33px;
+    }
+
+    .td-date-tab {
+        flex-basis: 72px;
+    }
+
+    .td-poster {
+        flex-basis: 74px;
+        min-height: 113px;
+        padding: 8px;
+    }
+
+        .td-poster b {
+            font-size: 15px;
+        }
+
+    .td-movie-topline {
+        gap: 7px;
+    }
+
+    .td-showtime {
+        min-width: 73px;
+        padding: 8px;
+    }
+
+        .td-showtime strong {
+            font-size: 11px;
+        }
+}

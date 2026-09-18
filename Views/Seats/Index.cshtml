@@ -1,0 +1,109 @@
+@model CineBook.Models.SeatSelectionViewModel
+@using System.Linq
+<link rel="stylesheet" href="~/css/seat-selection.css" />
+<partial name="_Navbar" model="Model"/>  
+<script src="~/js/seat-auth.js" asp-append-version="true"></script>
+
+@{
+    var tierPrices = new Dictionary<string, string>
+    {
+        { "regular", "$12" },
+        { "premium", "$16" },
+        { "recliner", "$18" },
+        { "vip", "$20" },
+        { "accessible", "$10" }
+    };
+}
+
+<div class="page-container">
+    <input type="hidden" id="booking-context" data-showtime-id="@Model.ShowtimeId" data-seat-limit="@Model.SeatCount" />
+
+    <h1>Select @Model.SeatCount seat@(Model.SeatCount == 1 ? string.Empty : "s")</h1>
+
+    <div class="show-info">
+        <strong>@Model.MovieName</strong> · @Model.TheatreName · @Model.ShowDate, @Model.ShowTime (@Model.ScreenName)
+    </div>
+
+    <div class="seat-page-content">
+
+        <div class="screen-wrap">
+            <svg class="screen-svg" viewBox="0 0 860 70">
+                <path class="screen-path" d="M 20 60 Q 430 10 840 60" />
+            </svg>
+            <div class="screen-label">SCREEN</div>
+        </div>
+
+        <div class="status-legend">
+            <div class="legend-item"><span class="legend-box available-box"></span> Available</div>
+            <div class="legend-item"><span class="legend-box selected-box"></span> Selected</div>
+            <div class="legend-item"><span class="legend-box booked-box"></span> Occupied</div>
+        </div>
+
+        <div class="seat-grid">
+            @if (Model.Seats.Count == 0)
+            {
+                <p class="seat-empty-state" role="status">Seats have not been configured for this showtime yet. Please choose another showtime.</p>
+            }
+            @foreach (var tierGroup in Model.Seats.GroupBy(s => s.Tier.ToString().ToLower()))
+            {
+                <div class="tier-section">
+                    <h2 class="tier-heading">
+                        @tierGroup.Key.ToUpper() (@tierPrices[tierGroup.Key])
+                    </h2>
+
+                    @foreach (var rowGroup in tierGroup.GroupBy(s => s.Row))
+                    {
+                        <div class="seat-row">
+                            <span class="row-label">@rowGroup.Key</span>
+
+                            <div class="seat-block">
+                                @foreach (var seat in rowGroup.OrderBy(s => s.Number))
+                                {
+                                    var isUnavailable = seat.Status == CineBook.Models.SeatStatus.Booked ||
+                                        (seat.Status == CineBook.Models.SeatStatus.Reserved && !seat.IsSelected);
+                                    string statusClass = isUnavailable ? "booked" : seat.IsSelected ? "selected" : "available";
+                                    <button type="button" class="seat @statusClass"
+                                         data-show-seat-id="@seat.ShowSeatId"
+                                         data-seat-id="@(seat.Row + seat.Number)"
+                                         data-tier="@seat.Tier.ToString().ToLower()"
+                                         data-price="@CineBook.Models.SeatPricing.GetPrice(seat.Tier)"
+                                         disabled="@(isUnavailable ? "disabled" : null)"
+                                         aria-pressed="@seat.IsSelected.ToString().ToLowerInvariant()"
+                                         aria-label="Seat @seat.Row@seat.Number, @seat.Tier@(isUnavailable ? ", unavailable" : string.Empty)">
+                                        @seat.Number
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="booking-summary">
+            <div class="summary-top">
+                <div class="summary-left">
+                    <div class="ticket-icon">🎟</div>
+                    <div class="selected-seats">
+                        <div class="summary-label">Seats Selected:</div>
+                        <span id="selected-seats-list" class="seats-value">None</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="total">
+                    <div class="summary-label">Total:</div>
+                    $<span id="total-price">0</span>
+                </div>
+            </div>
+            <button id="continue-btn" class="confirm-btn" type="button" disabled="@(Model.Seats.Count == 0 ? "disabled" : null)">Confirm Seats</button>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="~/js/seat-selection.js" asp-append-version="true"></script>
+@await Component.InvokeAsync("DashboardPanel")
+<script src="~/js/dashboard.js" asp-append-version="true"></script>

@@ -1,0 +1,292 @@
+.theatres-section {
+	padding: 36px 44px 44px;
+	background: linear-gradient(180deg, var(--velvet-900) 0%, var(--void) 100%);
+	border-top: 1px solid var(--velvet-700);
+}
+
+.theatres-header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	max-width: 1100px;
+	margin: 0 auto 6px;
+}
+
+.theatres-eyebrow {
+	font-family: 'JetBrains Mono', monospace;
+	font-size: 11px;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--gold);
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.theatres-eyebrow::before {
+		content: "";
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--gold);
+		box-shadow: 0 0 8px var(--gold);
+		animation: theatres-pulse 2s ease-in-out infinite;
+}
+
+@keyframes theatres-pulse {
+	0%, 100% {
+		opacity: 1;
+	}
+
+	50% {
+		opacity: .35;
+	}
+}
+
+.theatres-title {
+	font-family: 'Bebas Neue', sans-serif;
+	font-size: 30px;
+	letter-spacing: 0.02em;
+	margin: 6px 0 0;
+	color: var(--text-primary);
+}
+
+.theatres-title span {
+		color: var(--curtain-red-light);
+}
+
+.theatres-sub {
+	font-size: 13px;
+	color: var(--text-muted);
+	max-width: 1100px;
+	margin: 4px auto 22px;
+}
+
+.theatres-page {
+	padding-top: 54px;
+	padding-bottom: 64px;
+}
+
+.theatres-page-heading {
+	max-width: 920px;
+	margin: 0 auto 28px;
+	padding: 0 4px 22px;
+	border-bottom: 1px solid var(--velvet-700);
+}
+
+.theatres-page .theatres-sub {
+	margin: 8px 0 0;
+}
+
+.theatres-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 14px;
+	max-width: 920px;
+	margin: 0 auto;
+}
+
+.theatre-search-grid {
+	max-width: 920px;
+	margin-right: auto;
+	margin-left: auto;
+}
+
+/* Search results share the same left edge as the movie-result cards. */
+.cb-search-results .theatres-page {
+	padding-right: 0;
+	padding-left: 0;
+}
+
+.cb-search-results .theatres-page-heading,
+.cb-search-results .theatre-search-grid {
+	max-width: none;
+	margin-right: 0;
+	margin-left: 0;
+}
+
+.theatres-page-card {
+	min-height: 118px;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-rows: 1fr auto;
+	column-gap: 16px;
+	align-items: center;
+	padding: 20px 22px;
+	border-radius: 14px;
+	border: 1px solid var(--border-soft);
+	background:
+		linear-gradient(100deg, color-mix(in srgb, var(--curtain-red) 22%, transparent), transparent 45%),
+		var(--velvet-800);
+	overflow: hidden;
+}
+
+.theatres-page-card::after {
+	content: "View shows  \2192";
+	grid-column: 2;
+	grid-row: 1 / -1;
+	font-family: 'JetBrains Mono', monospace;
+	font-size: 10px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--gold);
+	white-space: nowrap;
+	transition: transform .18s ease;
+}
+
+.theatres-page-card .theatre-name {
+	grid-column: 1;
+	margin: 0;
+	font-size: 25px;
+}
+
+.theatres-page-card .theatre-area {
+	grid-column: 1;
+	margin-top: 2px;
+	font-size: 13px;
+}
+
+.theatres-page-card:hover {
+	transform: translateX(6px);
+	border-color: var(--gold);
+	box-shadow: 0 12px 28px var(--shadow-color);
+}
+
+.theatres-page-card:hover::after {
+	transform: translateX(4px);
+}
+
+.theatres-page-card:focus-visible {
+	outline: 2px solid var(--gold);
+	outline-offset: 3px;
+}
+
+.slider-viewport {
+	max-width: 1100px;
+	margin: 0 auto;
+	position: relative;
+}
+
+.slider-track {
+	display: flex;
+	gap: 14px;
+	overflow-x: auto;
+	scroll-snap-type: x proximity;
+	padding-bottom: 0;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.slider-track::-webkit-scrollbar {
+		display: none;
+}
+
+.theatre-card {
+	scroll-snap-align: start;
+	flex: 0 0 240px;
+	background: var(--velvet-800);
+	border: 1px solid var(--velvet-700);
+	border-radius: 10px;
+	padding: 16px;
+	position: relative;
+	transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+	cursor: pointer;
+}
+
+.theatre-card-link {
+	display: block;
+	color: inherit;
+	text-decoration: none;
+}
+
+.theatre-card:hover {
+		transform: translateY(-4px);
+		border-color: var(--gold);
+		box-shadow: 0 10px 24px var(--shadow-color);
+}
+
+.theatre-name {
+	font-family: 'Bebas Neue', sans-serif;
+	font-size: 20px;
+	letter-spacing: 0.01em;
+	margin: 2px 0 4px;
+	color: var(--text-primary);
+	line-height: 1.1;
+}
+
+.theatre-area {
+	font-size: 12px;
+	color: var(--text-muted);
+	margin: 0;
+}
+
+.nav-btn {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	border: 1px solid var(--velvet-700);
+	background: var(--velvet-800);
+	opacity:50%;
+	color: var(--text-primary);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	z-index: 1;
+	box-shadow: 0 6px 16px var(--shadow-color);
+	transition: background .15s ease, border-color .15s ease;
+}
+
+.nav-btn:hover {
+		background: var(--velvet-700);
+		border-color: var(--gold);
+}
+
+.nav-btn svg {
+		width: 15px;
+		height: 15px;
+		stroke: var(--text-primary);
+}
+
+#scrollLeft {
+	left: -18px;
+}
+
+#scrollRight {
+	right: -18px;
+}
+
+@media (max-width: 520px) {
+	.theatres-page {
+		padding-top: 36px;
+		padding-bottom: 44px;
+	}
+
+	.theatres-page-card {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: auto auto auto;
+		gap: 0 13px;
+		padding: 17px;
+	}
+
+	.theatres-page-card::after {
+		grid-column: 1;
+		grid-row: 3;
+		margin-top: 10px;
+	}
+
+	.theatres-page-card .theatre-name {
+		font-size: 22px;
+	}
+
+	.theatre-card {
+		flex-basis: 200px;
+	}
+
+	.theatres-title {
+		font-size: 24px;
+	}
+}

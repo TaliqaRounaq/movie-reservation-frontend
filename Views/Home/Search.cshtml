@@ -1,0 +1,156 @@
+@model CineBook.Models.MovieSearchViewModel
+@{
+    ViewData["Title"] = string.IsNullOrWhiteSpace(Model.Query) ? "Movie Search" : $"Search: {Model.Query}";
+}
+
+<partial name="_Navbar" />
+
+<main class="container cb-search-results">
+    <form class="cb-search-row movie-search-form" asp-controller="Home" asp-action="Search" method="get">
+        <input type="hidden" name="genre" value="@Model.Genre" />
+        <input type="hidden" name="language" value="@Model.Language" />
+        <div class="cb-search-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C6C72" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <input type="text" name="q" value="@Model.Query" class="cb-search-input" placeholder="Search movies" aria-label="Search movies" autofocus>
+            <a asp-controller="Home" asp-action="Index" class="cb-search-close" aria-label="Close search and return home" title="Close search">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </a>
+        </div>
+
+        <div class="dropdown">
+            <button class="cb-filter-chip" type="button" data-bs-toggle="dropdown" aria-expanded="false">@(string.IsNullOrEmpty(Model.Genre) ? "Genre" : Model.Genre)<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+            <ul class="dropdown-menu cb-filter-menu">
+                @foreach (var genre in Model.Genres) { <li><button class="dropdown-item search-filter" type="button" data-filter="genre" data-value="@genre">@genre</button></li> }
+            </ul>
+        </div>
+        <div class="dropdown">
+            <button class="cb-filter-chip" type="button" data-bs-toggle="dropdown" aria-expanded="false">@(string.IsNullOrEmpty(Model.Language) ? "Language" : Model.Language)<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></button>
+            <ul class="dropdown-menu cb-filter-menu">
+                @foreach (var language in Model.Languages) { <li><button class="dropdown-item search-filter" type="button" data-filter="language" data-value="@language">@language</button></li> }
+            </ul>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Genre) || !string.IsNullOrEmpty(Model.Language)) { <a class="cb-clear-filters" asp-action="Search" asp-route-q="@Model.Query">Clear filters</a> }
+    </form>
+
+    <section aria-labelledby="search-results-title">
+        @if (Model.ErrorMessages.Any())
+        {
+            <div class="alert alert-warning" role="alert">
+                @foreach (var message in Model.ErrorMessages)
+                {
+                    <p class="mb-0">@message</p>
+                }
+            </div>
+        }
+
+        <div class="cb-results-heading">
+            <div class="cb-section-overline">Movie search</div>
+            <h1 id="search-results-title" class="cb-section-title">@if (string.IsNullOrWhiteSpace(Model.Query)) { <text>All movies</text> } else { <text>Results for &ldquo;@Model.Query&rdquo;</text> }</h1>
+            <p>@Model.Movies.Count matching @(Model.Movies.Count == 1 ? "movie" : "movies")</p>
+        </div>
+
+        @if (Model.Movies.Any())
+        {
+            <div class="row g-3">
+                @foreach (var movie in Model.Movies) { <partial name="_MoviesCard" model="movie" /> }
+            </div>
+        }
+        else if (Model.ErrorMessages.Any())
+        {
+            <div class="cb-no-results">
+                <h2>Couldn't load movies</h2>
+                <p>Something went wrong on our end. Please try again in a moment.</p>
+                <a asp-controller="Home" asp-action="Index">Back to home</a>
+            </div>
+        }
+        else
+        {
+            <div class="cb-no-results"><h2>No movies found</h2><p>Try a different title, genre, or language.</p><a asp-controller="Home" asp-action="Index">Browse all movies</a></div>
+        }
+
+        @if (Model.Theatres.Any())
+        {
+            <section class="theatres-page" aria-labelledby="theatre-results-title">
+                <div class="theatres-page-heading">
+                    <div class="theatres-eyebrow">Cinema search</div>
+                    <h2 id="theatre-results-title" class="theatres-title">Matching <span>Theatres</span></h2>
+                    <p class="theatres-sub">@Model.Theatres.Count matching @(Model.Theatres.Count == 1 ? "cinema" : "cinemas")</p>
+                </div>
+                <div class="row g-3 theatre-search-grid">
+                    @foreach (var theatre in Model.Theatres)
+                    {
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <a asp-controller="Theatres" asp-action="Details" asp-route-theatreId="@theatre.Id" class="theatre-card theatres-page-card theatre-card-link h-100">
+                                <h3 class="theatre-name">@theatre.Name</h3>
+                                <p class="theatre-area">@theatre.Area</p>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+        else if (Model.ErrorMessages.Any())
+        {
+            <div class="cb-no-results">
+                <h2>Couldn't load theatres</h2>
+                <p>Something went wrong on our end. Please try again in a moment.</p>
+                <a asp-controller="Home" asp-action="Index">Back to home</a>
+            </div>
+        }
+        else
+        {
+            <div class="cb-no-results"><h2>No Theatres found</h2><p>Try a different region.</p><a asp-controller="Home" asp-action="Index">Browse all Theatres</a></div>
+        }
+    </section>
+</main>
+
+@await Component.InvokeAsync("DashboardPanel")
+
+@section Scripts {
+    <script>
+        const searchForm = document.querySelector('.movie-search-form');
+        const searchInput = searchForm?.querySelector('input[name="q"]');
+        let searchDelay;
+
+        if (searchInput) {
+            searchInput.focus();
+            const cursorAtEnd = searchInput.value.length;
+            searchInput.setSelectionRange(cursorAtEnd, cursorAtEnd);
+        }
+
+        searchInput?.addEventListener('input', () => {
+            const query = searchInput.value.trim();
+            clearTimeout(searchDelay);
+
+            if (!query) {
+                clearTimeout(searchDelay);
+            // searchDelay = setTimeout(() => {
+               
+            //     window.location.replace(`${searchForm.action}?q=${encodeURIComponent(query)}`);
+            // }, 250);
+                    // window.location.href(`${Home / Search}?q=${encodeURIComponent(query)}`
+                return;
+            }
+
+            searchDelay = setTimeout(() => {
+                const parameters = new URLSearchParams(new FormData(searchForm));
+                parameters.set('q', query);
+                window.location.assign(`${searchForm.action}?${parameters.toString()}`);
+            }, 250);
+        });
+
+        
+        searchForm?.addEventListener('submit', event => {
+            if (event.submitter) return;
+
+            document.querySelector('input[name="genre"]').value = '';
+            document.querySelector('input[name="language"]').value = '';
+        });
+
+        document.querySelectorAll('.search-filter').forEach(button => button.addEventListener('click', () => {
+            const field = document.querySelector(`input[name="${button.dataset.filter}"]`);
+            if (field) field.value = button.dataset.value;
+            button.closest('form')?.submit();
+        }));
+    </script>
+}

@@ -1,0 +1,104 @@
+@model DashboardViewModel
+@{
+    var userName = Context.Session.GetString("UserName");
+    var userEmail = Context.Session.GetString("UserEmail");
+    string initials = "";
+
+    if (!string.IsNullOrEmpty(userName))
+    {
+        var parts = userName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        initials = parts.Length > 0 ? parts[0][0].ToString() : "";
+        if (parts.Length > 1)
+        {
+            initials += parts[^1][0].ToString();
+        }
+        initials = initials.ToUpper();
+    }
+        bool isLoggedIn = !string.IsNullOrEmpty(userName);
+        var authJson = System.Text.Json.JsonSerializer.Serialize(new { isLoggedIn, name = userName, email = userEmail });
+
+}
+
+<div id="dashboardOverlay" class="dashboard-overlay"></div>
+
+<aside id="dashboardPanel" class="dashboard-panel" role="dialog" aria-modal="true" aria-labelledby="dashboardTitle" aria-hidden="true" tabindex="-1">
+    <div class="dp-header">
+        <div class="dp-user">
+            <div class="dp-avatar-sm" id="dashboardAvatar">@initials</div>
+            <div>
+                <p class="dp-kicker">Your account</p>
+                <h2 class="dp-name" id="dashboardTitle">@userName</h2>
+                <p class="dp-email" id="dashboardEmail">@userEmail</p>
+            </div>
+        </div>
+        <button id="closeDashboardBtn" class="dp-close" type="button" aria-label="Close dashboard"><span aria-hidden="true">&times;</span></button>
+    </div>
+
+    <div class="dp-section">
+        <span class="dp-label">Upcoming bookings</span>
+        @foreach (var booking in Model.UpcomingBookings)
+        {
+            <div class="dp-booking-card">
+                <div class="dp-card-topline"><p class="dp-booking-title">@booking.MovieTitle</p><span class="dp-status">Booked</span></div>
+                <p class="dp-booking-meta">@booking.ShowDateTime.ToString("ddd, d MMM · h:mm tt")</p>
+                <p class="dp-booking-place">@booking.TheatreName <span aria-hidden="true">·</span> Seats @booking.Seats</p>
+            </div>
+        }
+    </div>
+
+    <div class="dp-section">
+        <span class="dp-label">Offers for you</span>
+        @foreach (var offer in Model.Offers)
+        {
+            <div class="dp-offer-card"><p class="dp-offer-code">@offer.Code</p><p class="dp-offer-desc">@offer.Description</p></div>
+        }
+    </div>
+
+    <div class="dp-section">
+        <span class="dp-label">Past bookings</span>
+        @foreach (var booking in Model.PastBookings)
+        {
+            <div class="dp-history-row"><span>@booking.MovieTitle</span><span class="dp-history-date">@booking.ShowDateTime.ToString("d MMM")</span></div>
+        }
+    </div>
+
+    <div class="dp-section">
+        <span class="dp-label">Payment methods</span>
+        @foreach (var method in Model.PaymentMethods)
+        {
+            <div class="dp-payment-row">
+                <span class="dp-payment-icon" aria-hidden="true">@(method.Type == "Card" ? "▣" : "₹")</span>
+                <span>@method.Label</span>
+                @if (method.IsDefault) { <span class="dp-default">Default</span> }
+            </div>
+        }
+    </div>
+
+    <div class="dp-footer">
+        <button id="editProfileBtn" type="button" class="dp-nav dp-nav-button"><span aria-hidden="true">◉</span> Edit profile <b aria-hidden="true">›</b></button>
+        <button id="logoutBtn" type="button" class="dp-nav dp-nav-button" ><span aria-hidden="true">↗</span> Log out</button>
+    </div>
+</aside>
+
+@* //edit profile // *@
+<div id="editProfileOverlay" class="dp-modal-overlay"></div>
+<div id="editProfileModal" class="dp-modal" role="dialog" aria-modal="true" aria-labelledby="editProfileTitle" aria-hidden="true">
+    <div class="dp-modal-header">
+        <h3 id="editProfileTitle">Edit profile</h3>
+        <button type="button" id="closeEditProfileBtn" class="dp-close" aria-label="Close">&times;</button>
+    </div>
+    <form id="editProfileForm" class="dp-modal-body">
+        <label class="dp-form-label" for="editProfileName">Name</label>
+        <input type="text" id="editProfileName" class="dp-form-input" required>
+
+        <label class="dp-form-label" for="editProfileEmail">Email</label>
+        <input type="email" id="editProfileEmail" class="dp-form-input" required>
+
+        <p id="editProfileError" class="dp-form-error"></p>
+
+        <button type="submit" class="dp-form-submit">Save changes</button>
+    </form>
+</div>
+<script>
+    window.CineBookAuth = @Html.Raw(authJson);
+</script>
