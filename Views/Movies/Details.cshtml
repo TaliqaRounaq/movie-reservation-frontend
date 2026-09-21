@@ -8,6 +8,16 @@
 
 <div class="container cb-detail-wrap">
 
+    @if (Model.ErrorMessages.Any())
+    {
+        <div class="alert alert-warning" role="alert">
+            @foreach (var message in Model.ErrorMessages)
+            {
+                <p class="mb-0">@message</p>
+            }
+        </div>
+    }
+
     <div class="cb-detail-hero">
         <div class="cb-detail-poster">
             <span class="cb-detail-rating">&#9733; @Model.Rating</span>
@@ -55,6 +65,14 @@
    <div class="cb-detail-section" id="showtimes">
     <h2 class="cb-section-title">Showtimes</h2>
     <div id="showtimesContainer" data-movie-id="@Model.MovieId" data-movie-title="@Model.Title">
+        @if (!Model.Availability.Any() && Model.ErrorMessages.Any())
+        {
+            <p class="text-secondary">Couldn't load showtimes right now. Please try again shortly.</p>
+        }
+        else if (!Model.Availability.Any())
+        {
+            <p class="text-secondary">No showtimes available yet for this movie.</p>
+        }
         @foreach (var theatre in Model.Availability)
         {
             <div class="cb-showtime-card">

@@ -15,5 +15,6 @@ namespace CineBook.Models
         public List<DateTime> AvailableDates { get; set; }
         public DateTime SelectedDate { get; set; }
         public List<MovieWithShowtimes> Movies { get; set; }
+        public List<string> ErrorMessages { get; set; } = new();
     }
 }

@@ -56,3 +56,48 @@ function populateDashboardUser() {
         });
     }
 })();
+
+(() => {
+    const editBtn = document.getElementById('editProfileBtn');
+    const modal = document.getElementById('editProfileModal');
+    const modalOverlay = document.getElementById('editProfileOverlay');
+    const closeBtn = document.getElementById('closeEditProfileBtn');
+    const form = document.getElementById('editProfileForm');
+    const nameInput = document.getElementById('editProfileName');
+    const emailInput = document.getElementById('editProfileEmail');
+    const errorEl = document.getElementById('editProfileError');
+
+    if (!editBtn || !modal || !modalOverlay || !closeBtn || !form) return;
+
+    const openModal = () => {
+        // Pre-fill with the current session values so the form isn't blank
+        if (nameInput) nameInput.value = window.CineBookAuth?.name ?? '';
+        if (emailInput) emailInput.value = window.CineBookAuth?.email ?? '';
+        if (errorEl) errorEl.textContent = '';
+
+        modal.classList.add('open');
+        modalOverlay.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+    };
+
+    const closeModal = () => {
+        modal.classList.remove('open');
+        modalOverlay.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+    };
+
+    editBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', closeModal);
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal.classList.contains('open')) closeModal();
+    });
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();   // NEW — koi backend call nahi hai abhi, isliye page reload/submit rokna zaroori hai
+
+        if (errorEl) {
+            errorEl.textContent = "Profile updates aren't available yet — please check back soon.";
+        }
+    });
+})();

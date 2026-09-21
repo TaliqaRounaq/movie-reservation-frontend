@@ -24,7 +24,7 @@ public class PaymentController : Controller
         return View(model);
     }
 
-    
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Complete(PaymentViewModel model)
@@ -44,7 +44,6 @@ public class PaymentController : Controller
 
         try
         {
-            // A seat hold lasts five minutes. Renew it immediately before booking.
             var reservationError = await RenewSeatReservationsAsync(showSeatIds, token);
             if (reservationError != null)
             {
@@ -87,27 +86,48 @@ public class PaymentController : Controller
                 return RedirectToPayment(model);
             }
 
-        var booking = wrapper.Data;
-        var confirmation = new BookingConfirmationViewModel
-        {
-            ConfirmationId = "CB" + booking.BookingId.ToString("D6"),
-            MovieName = string.IsNullOrWhiteSpace(booking.MovieTitle) ? model.MovieName : booking.MovieTitle,
-            TheatreName = string.IsNullOrWhiteSpace(booking.TheaterName) ? model.TheatreName : booking.TheaterName,
-            HallName = string.IsNullOrWhiteSpace(booking.ScreenName) ? model.HallName : booking.ScreenName,
-            ShowDate = booking.ShowDateTime == default
-                ? FormatShowDate(model.ShowDate)
-                : booking.ShowDateTime.ToString("dd MMM yyyy"),
-            ShowTime = booking.ShowDateTime == default
-                ? model.ShowTime
-                : booking.ShowDateTime.ToString("h:mm tt"),
-            Seats = booking.Seats.Count > 0
-                ? booking.Seats.Select(s => s.SeatNumber).ToList()
-                : model.Seats.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
-            // The current booking API returns a fixed TotalAmount for every booking.
-            // Use the frontend checkout total, which is based on the selected seats.
-            AmountPaid = model.Amount
-        };
+            var booking = wrapper.Data;
 
+            // NEW: booking ban chuki hai — ab payment process karo isी booking ke against
+            var paymentResult = await ProcessPaymentAsync(booking.BookingId, model.Amount, token);
+
+            if (!paymentResult.Success)
+            {
+                // Payment fail hui — booking ko cancel karne ki koshish karo, taaki seats free ho jayein
+                _logger.LogWarning(
+                    "Payment failed for BookingId {BookingId}: {Reason}. Attempting to cancel booking.",
+                    booking.BookingId, paymentResult.ErrorMessage);
+
+                var cancelled = await TryCancelBookingAsync(booking.BookingId, token);
+
+                TempData["BookingError"] = cancelled
+                    ? "Payment failed. Your seats have been released — please try booking again."
+                    : $"Payment failed, and we couldn't automatically release your seats. Please contact support with Booking ID #{booking.BookingId}.";
+
+                return RedirectToPayment(model);
+            }
+
+            var ticketNumber = await FetchTicketNumberAsync(booking.BookingId, token);
+
+            var confirmation = new BookingConfirmationViewModel
+            {
+                ConfirmationId = "CB" + booking.BookingId.ToString("D6"),
+                BookingId = booking.BookingId,   // NEW
+                MovieName = string.IsNullOrWhiteSpace(booking.MovieTitle) ? model.MovieName : booking.MovieTitle,
+                TheatreName = string.IsNullOrWhiteSpace(booking.TheaterName) ? model.TheatreName : booking.TheaterName,
+                HallName = string.IsNullOrWhiteSpace(booking.ScreenName) ? model.HallName : booking.ScreenName,
+                ShowDate = booking.ShowDateTime == default
+                    ? FormatShowDate(model.ShowDate)
+                    : booking.ShowDateTime.ToString("dd MMM yyyy"),
+                ShowTime = booking.ShowDateTime == default
+                    ? model.ShowTime
+                    : booking.ShowDateTime.ToString("h:mm tt"),
+                Seats = booking.Seats.Count > 0
+                    ? booking.Seats.Select(s => s.SeatNumber).ToList()
+                    : model.Seats.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
+                AmountPaid = model.Amount,
+                TicketNumber = ticketNumber   // NEW
+            };
             TempData["BookingConfirmation"] = JsonSerializer.Serialize(confirmation);
             HttpContext.Session.Remove($"ReservedSeats:{model.ShowtimeId}");
 
@@ -137,6 +157,103 @@ public class PaymentController : Controller
         return RedirectToPayment(model);
     }
 
+    // NEW — payment ko process karta hai, aur ek simple (Success, ErrorMessage) result deता hai
+    private async Task<(bool Success, string? ErrorMessage)> ProcessPaymentAsync(int bookingId, decimal amount, string token)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, "api/payments/process");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            request.Content = JsonContent.Create(new ProcessPaymentRequestDto
+            {
+                BookingId = bookingId,
+                Amount = amount,
+                PaymentMethod = CineBook.Models.Enums.PaymentMethod.CreditCard   // demo form is card-only for now
+            });
+
+            using var response = await _httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Payment API returned HTTP {StatusCode} for BookingId {BookingId}.", response.StatusCode, bookingId);
+                return (false, "Payment service returned an error.");
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<PaymentDetailDto>>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (wrapper?.Success != true || wrapper.Data == null)
+            {
+                return (false, wrapper?.Message ?? "Payment was not successful.");
+            }
+
+            var isSuccessStatus = string.Equals(wrapper.Data.Status, "Success", StringComparison.OrdinalIgnoreCase);
+            return isSuccessStatus ? (true, null) : (false, $"Payment status: {wrapper.Data.Status}");
+        }
+        catch (TaskCanceledException ex)
+        {
+            _logger.LogError(ex, "Payment API timed out for BookingId {BookingId}.", bookingId);
+            return (false, "Payment request timed out.");
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "Payment API could not be reached for BookingId {BookingId}.", bookingId);
+            return (false, "Payment service is unavailable.");
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "Payment API returned invalid JSON for BookingId {BookingId}.", bookingId);
+            return (false, "Payment service returned an unexpected response.");
+        }
+    }
+    // NEW — ticket number fetch karta hai; fail hone par null return karta hai, crash nahi karta
+    private async Task<string?> FetchTicketNumberAsync(int bookingId, string token)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, $"api/tickets/{bookingId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            using var response = await _httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Ticket API returned HTTP {StatusCode} for BookingId {BookingId}.", response.StatusCode, bookingId);
+                return null;
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<TicketDetailDto>>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return wrapper?.Success == true ? wrapper.Data?.TicketNumber : null;
+        }
+        catch (Exception ex)
+        {
+            // Non-fatal on purpose — booking + payment are already done, so a ticket-fetch
+            // failure shouldn't take down the confirmation page.
+            _logger.LogError(ex, "Failed to fetch ticket for BookingId {BookingId}.", bookingId);
+            return null;
+        }
+    }
+    // NEW — payment fail hone par booking cancel karne ki koshish, best-effort (fail bhi ho sakta hai)
+    private async Task<bool> TryCancelBookingAsync(int bookingId, string token)
+    {
+        try
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Delete, $"api/bookings/{bookingId}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            using var response = await _httpClient.SendAsync(request);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to cancel BookingId {BookingId} after payment failure.", bookingId);
+            return false;
+        }
+    }
     private static string FormatShowDate(string value) =>
         DateTime.TryParse(value, out var date) ? date.ToString("dd MMM yyyy") : value;
 

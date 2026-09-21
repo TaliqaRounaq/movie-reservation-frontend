@@ -6,6 +6,19 @@
 <partial name="_Navbar" />
 
 <main class="td-page">
+
+    @if (Model.ErrorMessages.Any())
+    {
+        <div class="container">
+            <div class="alert alert-warning" role="alert">
+                @foreach (var message in Model.ErrorMessages)
+                {
+                    <p class="mb-0">@message</p>
+                }
+            </div>
+        </div>
+    }
+
     <section class="td-hero" aria-labelledby="theatre-name">
         <div class="container td-hero-inner">
             <a asp-controller="Home" asp-action="Index" class="td-back-link"><span>&larr;</span> Back to movies</a>
@@ -53,6 +66,14 @@
         </nav>
 
         <div class="td-showtime-list">
+            @if (!Model.Movies.Any() && Model.ErrorMessages.Any())
+            {
+                <p class="td-note">Couldn't load showtimes for this theatre right now. Please try again shortly.</p>
+            }
+            else if (!Model.Movies.Any())
+            {
+                <p class="td-note">No showtimes available for this date. Try another day above.</p>
+            }
             @foreach (var item in Model.Movies)
             {
                 <article class="td-movie-card">

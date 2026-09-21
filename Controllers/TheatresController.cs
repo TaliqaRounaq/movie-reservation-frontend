@@ -1,9 +1,7 @@
 using CineBook.Models;
 using CineBook.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Text.Json;
 
 namespace CineBook.Controllers
@@ -11,25 +9,59 @@ namespace CineBook.Controllers
     public class TheatresController : Controller
     {
         private readonly HttpClient _httpClient;
+        private readonly ILogger<TheatresController> _logger;
 
-        public TheatresController(IHttpClientFactory httpClientFactory)
+        public TheatresController(IHttpClientFactory httpClientFactory, ILogger<TheatresController> logger)
         {
             _httpClient = httpClientFactory.CreateClient("BackendApi");
+            _logger = logger;
+        }
+
+        private const string GenericLoadError = "Some content couldn't be loaded right now. Please try again shortly.";
+
+        private async Task<string?> SafeGetJsonAsync(string endpoint, List<string> errors)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync(endpoint);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Backend returned {StatusCode} for {Endpoint}", response.StatusCode, endpoint);
+                    errors.Add(GenericLoadError);
+                    return null;
+                }
+
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (TaskCanceledException ex)
+            {
+                _logger.LogError(ex, "Timed out calling {Endpoint}", endpoint);
+                errors.Add(GenericLoadError);
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "Network error calling {Endpoint}", endpoint);
+                errors.Add(GenericLoadError);
+            }
+
+            return null;
         }
 
         public async Task<IActionResult> Index(int? cityId)
         {
-            // The navbar link does not carry a query string, so use the city the
-            // visitor selected and saved in the browser cookie. A query value takes
-            // precedence when the city selector deliberately reloads this page.
+            var errors = new List<string>();
+
             var selectedCityId = cityId is > 0
                 ? cityId.GetValueOrDefault()
                 : GetSelectedCityId() ?? 2;
 
             ViewData["SelectedCityId"] = selectedCityId;
             ViewData["SelectedCityName"] = Request.Cookies["cinego-city-name"] ?? "your city";
+            ViewData["ErrorMessages"] = errors;   // NEW — Index() uses a plain List<Theatre> as its model,
+                                                  // so ErrorMessages has to travel via ViewData instead of a ViewModel
 
-            List<Theatre> theatres = await FetchTheatresForCityAsync(selectedCityId);
+            List<Theatre> theatres = await FetchTheatresForCityAsync(selectedCityId, errors);
             return View(theatres);
         }
 
@@ -43,36 +75,50 @@ namespace CineBook.Controllers
 
         public async Task<IActionResult> Details(int theatreId, DateTime? date = null)
         {
-            // Step 1: Theatre info
-            Theatre? theatre = await FetchTheatreByIdAsync(theatreId);
-            if (theatre == null) return NotFound();
+            var errors = new List<string>();
+
+            // Step 1: Theatre info — this one IS fatal to the page if it fails,
+            // so we distinguish "genuinely doesn't exist" from "backend failed".
+            var (theatre, notFoundInBackend, theatreFetchFailed) = await FetchTheatreByIdAsync(theatreId, errors);
+
+            if (notFoundInBackend)
+            {
+                return NotFound();
+            }
+
+            if (theatreFetchFailed || theatre == null)
+            {
+                _logger.LogWarning("Theatre details failed to load for id {TheatreId}", theatreId);
+                return RedirectToAction("Error", "Home");
+            }
 
             List<DateTime> availableDates = GetNextFourDates();
             DateTime selectedDate = date ?? availableDates[0];
 
-            // Step 2: Is theatre ke screens dhoondo
-            List<(int ScreenId, string ScreenName)> screens = await FetchScreensForTheatreAsync(theatreId);
+            // Step 2: Screens — NOT fatal. If this fails, the page still loads,
+            // just with an empty movie list for this theatre (handled gracefully below).
+            List<(int ScreenId, string ScreenName)> screens = await FetchScreensForTheatreAsync(theatreId, errors);
 
-            // Step 3: Har screen ke shows fetch karo, combine karo
+            // Step 3: Shows per screen — each screen's failure is isolated. One bad
+            // screen doesn't take down the others.
             var allShows = new List<(int ShowId, int MovieId, DateTime ShowTime, string ScreenName)>();
             foreach (var screen in screens)
             {
-                var shows = await FetchShowsForScreenAsync(screen.ScreenId);
+                var shows = await FetchShowsForScreenAsync(screen.ScreenId, errors);
                 foreach (var s in shows)
                 {
                     allShows.Add((s.ShowId, s.MovieId, s.ShowTime, screen.ScreenName));
                 }
             }
 
-            // Step 4: Selected date ke shows filter karo
             var showsOnDate = allShows.Where(s => s.ShowTime.Date == selectedDate.Date).ToList();
 
-            // Step 5: Movie-wise group karo
+            // Step 4/5: Movie-wise group + fetch — each movie's failure is isolated too.
             var movieGroups = new List<MovieWithShowtimes>();
             foreach (var group in showsOnDate.GroupBy(s => s.MovieId))
             {
-                Movie? movie = await FetchMovieAsync(group.Key);
-                if (movie == null) continue;
+                Movie? movie = await FetchMovieAsync(group.Key, errors);
+                if (movie == null) continue;   // skip just this movie, keep going
 
                 var showtimes = group
                     .OrderBy(s => s.ShowTime)
@@ -94,97 +140,137 @@ namespace CineBook.Controllers
                 Theatre = theatre,
                 AvailableDates = availableDates,
                 SelectedDate = selectedDate,
-                Movies = movieGroups
+                Movies = movieGroups,
+                ErrorMessages = errors.Distinct().ToList()   // NEW
             };
 
             return View(viewModel);
         }
 
-        private async Task<List<Theatre>> FetchTheatresForCityAsync(int cityId)
+        private async Task<List<Theatre>> FetchTheatresForCityAsync(int cityId, List<string> errors)
         {
-            var response = await _httpClient.GetAsync($"api/theaters/city/{cityId}");
-            if (!response.IsSuccessStatusCode) return new List<Theatre>();
+            var json = await SafeGetJsonAsync($"api/theaters/city/{cityId}", errors);
+            if (json == null) return new List<Theatre>();
 
-            var json = await response.Content.ReadAsStringAsync();
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<List<TheaterListDto>>>(json, options);
-
-            if (wrapper?.Success != true || wrapper.Data == null) return new List<Theatre>();
-
-            return wrapper.Data.Select(t => new Theatre { Id = t.TheaterId, Name = t.TheaterName, Area = t.Location }).ToList();
-        }
-
-        private async Task<Theatre?> FetchTheatreByIdAsync(int theatreId)
-        {
-            var response = await _httpClient.GetAsync("api/theaters");
-            if (!response.IsSuccessStatusCode) return null;
-
-            var json = await response.Content.ReadAsStringAsync();
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<List<TheaterListDto>>>(json, options);
-
-            if (wrapper?.Success != true || wrapper.Data == null) return null;
-
-            var match = wrapper.Data.FirstOrDefault(t => t.TheaterId == theatreId);
-            if (match == null) return null;
-
-            return new Theatre { Id = match.TheaterId, Name = match.TheaterName, Area = match.Location };
-        }
-
-        //private async Task<List<(int ScreenId, string ScreenName)>> FetchScreensForTheatreAsync(int theatreId)
-        private async Task<List<(int ScreenId, string ScreenName)>> FetchScreensForTheatreAsync(int theatreId)
-        {
-            var response = await _httpClient.GetAsync($"api/theaters/{theatreId}/screens");
-            if (!response.IsSuccessStatusCode) return new List<(int, string)>();
-
-            var json = await response.Content.ReadAsStringAsync();
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<List<TheaterScreenDto>>>(json, options);
-
-            if (wrapper?.Success != true || wrapper.Data == null) return new List<(int, string)>();
-
-            return wrapper.Data
-                .Select(s => (s.ScreenId, s.ScreenName))
-                .ToList();
-        }
-
-        private async Task<List<(int ShowId, int MovieId, DateTime ShowTime)>> FetchShowsForScreenAsync(int screenId)
-        {
-            var response = await _httpClient.GetAsync($"api/screens/{screenId}/shows");
-            if (!response.IsSuccessStatusCode) return new List<(int, int, DateTime)>();
-
-            var json = await response.Content.ReadAsStringAsync();
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<List<ScreenShowDto>>>(json, options);
-
-            if (wrapper?.Success != true || wrapper.Data == null) return new List<(int, int, DateTime)>();
-
-            return wrapper.Data.Select(s => (s.ShowId, s.MovieId, s.ShowTime)).ToList();
-        }
-
-        private async Task<Movie?> FetchMovieAsync(int movieId)
-        {
-            var response = await _httpClient.GetAsync($"api/movies/{movieId}");
-            if (!response.IsSuccessStatusCode) return null;
-
-            var json = await response.Content.ReadAsStringAsync();
-            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<MovieDetailDto>>(json, options);
-
-            if (wrapper?.Success != true || wrapper.Data == null) return null;
-            var m = wrapper.Data;
-
-            return new Movie
+            try
             {
-                Id = movieId,
-                Title = m.Title,
-                Genre = m.Genre,
-                Language = m.Language,
-                Runtime = FormatDuration(m.Duration),
-                Certificate = m.Certificate,
-                Rating = (double)m.Rating,
-                PosterUrl = m.PosterUrl
-            };
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<List<TheaterListDto>>>(json, options);
+
+                if (wrapper?.Success != true || wrapper.Data == null) return new List<Theatre>();
+
+                return wrapper.Data.Select(t => new Theatre { Id = t.TheaterId, Name = t.TheaterName, Area = t.Location }).ToList();
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Malformed JSON from api/theaters/city/{CityId}", cityId);
+                errors.Add(GenericLoadError);
+                return new List<Theatre>();
+            }
+        }
+
+        private async Task<(Theatre? Theatre, bool NotFoundInBackend, bool Failed)> FetchTheatreByIdAsync(int theatreId, List<string> errors)
+        {
+            var json = await SafeGetJsonAsync("api/theaters", errors);
+            if (json == null) return (null, false, true);
+
+            try
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<List<TheaterListDto>>>(json, options);
+
+                if (wrapper?.Success != true || wrapper.Data == null)
+                    return (null, false, true);
+
+                var match = wrapper.Data.FirstOrDefault(t => t.TheaterId == theatreId);
+                if (match == null)
+                    return (null, true, false);   // genuinely doesn't exist in the list — not a failure
+
+                return (new Theatre { Id = match.TheaterId, Name = match.TheaterName, Area = match.Location }, false, false);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Malformed JSON from api/theaters");
+                errors.Add(GenericLoadError);
+                return (null, false, true);
+            }
+        }
+
+        private async Task<List<(int ScreenId, string ScreenName)>> FetchScreensForTheatreAsync(int theatreId, List<string> errors)
+        {
+            var json = await SafeGetJsonAsync($"api/theaters/{theatreId}/screens", errors);
+            if (json == null) return new List<(int, string)>();
+
+            try
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<List<TheaterScreenDto>>>(json, options);
+
+                if (wrapper?.Success != true || wrapper.Data == null) return new List<(int, string)>();
+
+                return wrapper.Data.Select(s => (s.ScreenId, s.ScreenName)).ToList();
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Malformed JSON from api/theaters/{TheatreId}/screens", theatreId);
+                errors.Add(GenericLoadError);
+                return new List<(int, string)>();
+            }
+        }
+
+        private async Task<List<(int ShowId, int MovieId, DateTime ShowTime)>> FetchShowsForScreenAsync(int screenId, List<string> errors)
+        {
+            var json = await SafeGetJsonAsync($"api/screens/{screenId}/shows", errors);
+            if (json == null) return new List<(int, int, DateTime)>();
+
+            try
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<List<ScreenShowDto>>>(json, options);
+
+                if (wrapper?.Success != true || wrapper.Data == null) return new List<(int, int, DateTime)>();
+
+                return wrapper.Data.Select(s => (s.ShowId, s.MovieId, s.ShowTime)).ToList();
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Malformed JSON from api/screens/{ScreenId}/shows", screenId);
+                errors.Add(GenericLoadError);
+                return new List<(int, int, DateTime)>();
+            }
+        }
+
+        private async Task<Movie?> FetchMovieAsync(int movieId, List<string> errors)
+        {
+            var json = await SafeGetJsonAsync($"api/movies/{movieId}", errors);
+            if (json == null) return null;
+
+            try
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var wrapper = JsonSerializer.Deserialize<ApiResponseWrapper<MovieDetailDto>>(json, options);
+
+                if (wrapper?.Success != true || wrapper.Data == null) return null;
+                var m = wrapper.Data;
+
+                return new Movie
+                {
+                    Id = movieId,
+                    Title = m.Title,
+                    Genre = m.Genre,
+                    Language = m.Language,
+                    Runtime = FormatDuration(m.Duration),
+                    Certificate = m.Certificate,
+                    Rating = (double)m.Rating,
+                    PosterUrl = m.PosterUrl
+                };
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, "Malformed JSON from api/movies/{MovieId}", movieId);
+                errors.Add(GenericLoadError);
+                return null;
+            }
         }
 
         private static string FormatDuration(int minutes)

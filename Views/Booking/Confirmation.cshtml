@@ -12,7 +12,17 @@
 
         <h1 class="confirmation-title">Booking Confirmed</h1>
         <p class="confirmation-sub">You're all set</p>
-        <p class="confirmation-id">Confirmation ID: <span>@Model.ConfirmationId</span></p>
+        @* <p class="confirmation-id">Confirmation ID: <span>@Model.ConfirmationId</span></p> *@
+
+        @if (!string.IsNullOrEmpty(Model.TicketNumber))
+        {
+            <p class="confirmation-id">Ticket No: <span>@Model.TicketNumber</span></p>
+        }
+
+        @if (TempData["DownloadError"] is string downloadError)
+        {
+            <div class="alert alert-warning" role="alert">@downloadError</div>
+        }
 
         <div class="ticket-details">
             <h3>Ticket Details</h3>
@@ -26,12 +36,9 @@
         </div>
 
         <div class="confirmation-actions">
-            <button type="button" class="btn-outline" id="download-ticket">Download Ticket</button>
+            <a href="@Url.Action("DownloadTicket", "Booking", new { bookingId = Model.BookingId })" class="btn-outline">Download Ticket</a>
             <a href="@Url.Action("Index", "Home")" class="btn-solid">Back to Home</a>
         </div>
 
     </div>
 </div>
-<script>
-document.getElementById('download-ticket')?.addEventListener('click', function () { window.print(); });
-</script>

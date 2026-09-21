@@ -17,6 +17,7 @@ namespace CineBook.Models
         public List<string> Crew { get; set; } = new();
 
         public List<TheatreAvailability> Availability { get; set; } = new();
+        public List<string> ErrorMessages { get; set; } = new();
     }
 
     public class TheatreAvailability
