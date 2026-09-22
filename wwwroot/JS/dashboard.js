@@ -94,7 +94,7 @@ function populateDashboardUser() {
     });
 
     form.addEventListener('submit', (event) => {
-        event.preventDefault();   // NEW — koi backend call nahi hai abhi, isliye page reload/submit rokna zaroori hai
+        event.preventDefault();  
 
         if (errorEl) {
             errorEl.textContent = "Profile updates aren't available yet — please check back soon.";
