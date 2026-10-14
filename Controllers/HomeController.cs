@@ -223,10 +223,18 @@ namespace CineBook.Controllers
                 : Task.FromResult(new List<Theatre>());
 
             await Task.WhenAll(nowShowingTask, recommendedTask, upcomingTask, nearbyTheatresTask);
+            var nowShowing = nowShowingTask.Result;
+
+            var heroMovies = nowShowing.Where(m => m.IsFeatured).Take(4).ToList();
+            if (!heroMovies.Any())
+            {
+                heroMovies = nowShowing.Take(4).ToList();
+            }
 
             return new HomeViewModel
             {
-                NowShowing = nowShowingTask.Result,
+                HeroMovies = heroMovies,
+                NowShowing = nowShowing,
                 Recommended = recommendedTask.Result,
                 Upcoming = upcomingTask.Result,
                 NearbyTheatres = nearbyTheatresTask.Result,
@@ -270,7 +278,8 @@ namespace CineBook.Controllers
                             Language = dto.Language,
                             Rating = (double)dto.Rating,
                             Runtime = FormatDuration(dto.Duration),
-                            PosterUrl = dto.PosterUrl
+                            PosterUrl = dto.PosterUrl,
+                            IsFeatured = dto.IsFeatured
                         });
                     }
                 }

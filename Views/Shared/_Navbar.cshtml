@@ -127,7 +127,7 @@
                 btn.addEventListener('click', function () {
                 document.getElementById('selected-location').textContent = city.name;
                 setCityCookies(city.cityId, city.name);
-                updateCityTexts(city.name);   // ← naya
+                updateCityTexts(city.name);   
                 selectedCityId = city.cityId;
                 loadTheatresForCity(city.cityId);
                 document.dispatchEvent(new CustomEvent('cinego:cityChanged', { detail: { cityId: city.cityId, source: 'user' } }));

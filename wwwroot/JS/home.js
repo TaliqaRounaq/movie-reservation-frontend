@@ -23,8 +23,7 @@
     function populateIndex() {
         const recommendedSection = document.getElementById('recommended-section');
         recommendedSection?.classList.toggle('d-none', !window.CineBookAuth?.isLoggedIn);
-        // indexAvatar ab Razor khud render kar deta hai _Navbar.cshtml mein,
-        // isliye yahan set karne ki zaroorat nahi
+       
     }
     populateIndex();
 })();

@@ -64,19 +64,43 @@
         </ul>
     </div>
 </form>
-    
 
-    <div class="cb-hero">
-        <div class="cb-hero-art" aria-hidden="true"><span>WELCOME</span><span>TO THE</span><span>JUNGLE</span></div>
-        <div class="cb-hero-content">
-            <div class="cb-hero-eyebrow"><i></i> Now trending in <span id="heroCityName">@(ViewData["SelectedCityName"] ?? "your city")</span></div>
-            <h1 class="cb-hero-title">Welcome to the Jungle</h1>
-            <div class="cb-hero-meta">UA 16+ &middot; 2h 45m &middot; Comedy &middot; Hindi</div>
-            <a asp-controller="Movies" asp-action="Details" asp-route-id="1" class="cb-hero-cta">Book tickets <span>&rarr;</span></a>
+
+@if (Model.HeroMovies.Any())
+{
+    <div class="cb-hero" id="cbHero">
+        @for (var i = 0; i < Model.HeroMovies.Count; i++)
+        {
+            var hero = Model.HeroMovies[i];
+            var titleWords = hero.Title.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var metaParts = new[] { hero.Certificate, hero.Runtime, hero.Genre, hero.Language }
+                .Where(p => !string.IsNullOrWhiteSpace(p));
+
+            <div class="cb-hero-slide @(i == 0 ? "active" : "")">
+                <div class="cb-hero-art" aria-hidden="true">
+                    @foreach (var word in titleWords)
+                    {
+                        <span>@word</span>
+                    }
+                </div>
+                <div class="cb-hero-content">
+                    <div class="cb-hero-eyebrow"><i></i> Now trending in <span class="hero-city-name">@(ViewData["SelectedCityName"] ?? "your city")</span></div>
+                    <h1 class="cb-hero-title">@hero.Title</h1>
+                    <div class="cb-hero-meta">@string.Join(" \u00B7 ", metaParts)</div>
+                    <a asp-controller="Movies" asp-action="Details" asp-route-id="@hero.Id" class="cb-hero-cta">Book tickets <span>&rarr;</span></a>
+                </div>
+            </div>
+        }
+
+        <div class="cb-hero-dots">
+            @for (var i = 0; i < Model.HeroMovies.Count; i++)
+            {
+                <span class="@(i == 0 ? "active" : "")" data-index="@i"></span>
+            }
         </div>
-        <div class="cb-hero-dots"><span class="active"></span><span></span><span></span><span></span></div> 
     </div>
-
+}
+    
     <section class="mb-5">
         <div class="cb-section-head">
             <div><div class="cb-section-overline">The big screen awaits</div><div class="cb-section-title">Now showing</div></div>
@@ -167,3 +191,4 @@
 </footer>
 @await Component.InvokeAsync("DashboardPanel")
 <script src="~/js/home.js" asp-append-version="true"></script>
+<script src="~/js/hero.js" asp-append-version="true"></script>

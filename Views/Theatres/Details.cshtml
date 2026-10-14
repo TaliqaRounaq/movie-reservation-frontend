@@ -28,7 +28,7 @@
                     <h1 id="theatre-name">@Model.Theatre.Name</h1>
                     <p class="td-location">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
-                        @Model.Theatre.Area, Srinagar
+                        @Model.Theatre.Area
                     </p>
                     <div class="td-amenities">
                         <span>Dolby Atmos</span><span>Food &amp; beverages</span><span>Wheelchair access</span>
@@ -108,6 +108,7 @@
     </section>
    
 <script src="~/js/home.js" asp-append-version="true"></script>
+<script src="~/js/theatre-details.js" asp-append-version="true"></script>
 @await Component.InvokeAsync("DashboardPanel")
 <script src="~/js/dashboard.js" asp-append-version="true"></script>
 </main>

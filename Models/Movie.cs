@@ -11,6 +11,7 @@ namespace CineBook.Models
         public double? Rating { get; set; }
         public string? ReleaseNote { get; set; }
         public string? PosterUrl { get; set; }
+        public bool IsFeatured { get; set; }
     }
     public class Theatre
     {
@@ -22,6 +23,7 @@ namespace CineBook.Models
 
     public class HomeViewModel
     {
+        public List<Movie> HeroMovies { get; set; } = new();
         public List<Movie> NowShowing { get; set; } = new();
         public List<Movie> Recommended { get; set; } = new();
         public List<Movie> Upcoming { get; set; } = new();
